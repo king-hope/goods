@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>我的周邊收藏</title>
+
+<style>
+body { margin:0; font-family:system-ui,sans-serif; background:#f2f2f2; }
+header {
+  background:#fff;
+  padding:16px;
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+.filters { margin-bottom:8px; }
+.filters button {
+  margin:4px;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  background:#e0e0e0;
+  cursor:pointer;
+}
+.filters button:hover { background:#cfcfcf; }
+
+.grid {
+  padding:16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:16px;
+}
+.card {
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+.card img {
+  width:100%;
+  height:200px;
+  object-fit:cover;
+}
+.card-title {
+  padding:8px;
+  font-size:14px;
+  text-align:center;
+}
+
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+}
+.modal-box {
+  background:#fff;
+  max-width:600px;
+  width:90%;
+  max-height:90%;
+  overflow-y:auto;
+  border-radius:10px;
+  padding:16px;
+}
+.modal-box img {
+  width:100%;
+  margin-bottom:12px;
+}
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.current-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #c62828;
+}
+.original-price {
+  font-size: 13px;
+  color: #9e9e9e; /* 移除刪除線 */
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #e3f2fd;
+  color: #1565c0;
+  margin: 6px 0;
+}
+
+/* 狀態顏色 */
+.badge.已到家 { background:#c8e6c9; color:#2e7d32; }
+.badge.已付款 { background:#fff9c4; color:#f9a825; }
+/.badge.缺貨   { background:#ffcdd2; color:#c62828; }/
+.badge.未付款 { background:#bbdefb; color:#1565c0; }
+
+
+.card-info {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.card-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+.filters button.active {
+  background: #5c6bc0;
+  color: #fff;
+}
+
+.modal-box h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.modal-box .price-row {
+  margin: 8px 0;
+}
+
+.modal-box p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="filters" id="workFilters"></div>
+  <div class="filters" id="statusFilters"></div>
+  <div class="filters" id="characterFilters"></div> <!-- 新增角色篩選 -->
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script>
+let currentWork = "全部";
+let currentStatus = "全部";
+let currentCharacter = "全部";
+
+function applyFilters() {
+  let result = allItems;
+  if (currentWork !== "全部") {
+    result = result.filter(i => i.work === currentWork);
+  }
+  if (currentStatus !== "全部") {
+    result = result.filter(i => i.status === currentStatus);
+  }
+  if (currentCharacter !== "全部") {
+    result = result.filter(i => i.character === currentCharacter);
+  }
+  renderGrid(result);
+}
+
+const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
+let allItems = [];
+
+/* Google Drive 圖片轉換 */
+function convertDriveLink(link) {
+  if (!link) return "";
+  const match = link.match(/[-\w]{25,}/);
+  if (!match) return link;
+  return `https://lh3.googleusercontent.com/d/${match[0]}`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr; // 如果不是有效日期，就原樣顯示
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  // 星期陣列
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekday = weekdays[d.getDay()];
+
+  return `${year}/${month}/${day} (${weekday})`;
+}
+
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => {
+    allItems = data.map(item => ({
+      work: item["作品"] || "",
+      character: item["角色"] || "",
+      title: item["明細（標題）"] || "",
+      type: item["類型"] || "",
+      image: convertDriveLink(item["照片"]),
+      quantity: item["數量"] || "",
+      status: item["狀態"] || "",
+      price: item["金額"] || "",
+      originalPrice: item["原價"] || "",
+      platform: item["購買平台"] || "",
+      note: item["備註"] || "",
+      date: formatDate(item["日期"])
+
+    }));
+    createFilters();
+    renderGrid(allItems);
+  })
+  .catch(err => console.error("資料讀取失敗：", err));
+
+function createFilters() {
+  const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
+  const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
+  const characterSet = new Set(allItems.map(i => i.character).filter(Boolean));
+
+  const workDiv = document.getElementById("workFilters");
+  const statusDiv = document.getElementById("statusFilters");
+  const characterDiv = document.getElementById("characterFilters");
+
+  workDiv.innerHTML = "<strong>作品篩選：</strong>";
+  statusDiv.innerHTML = "<strong>狀態篩選：</strong>";
+  characterDiv.innerHTML = "<strong>角色篩選：</strong>";
+
+  addFilterButtons(workDiv, workSet, "work");
+  addFilterButtons(statusDiv, statusSet, "status");
+  addFilterButtons(characterDiv, characterSet, "character");
+}
+
+function addFilterButtons(container, set, type) {
+  const allBtn = document.createElement("button");
+  allBtn.textContent = "全部";
+  allBtn.classList.add("active");
+  allBtn.onclick = () => {
+    if (type === "work") currentWork = "全部";
+    if (type === "status") currentStatus = "全部";
+    if (type === "character") currentCharacter = "全部";
+    updateActive(container, allBtn);
+    applyFilters();
+  };
+  container.appendChild(allBtn);
+
+  set.forEach(val => {
+    const btn = document.createElement("button");
+    btn.textContent = val;
+    btn.onclick = () => {
+      if (type === "work") currentWork = val;
+      if (type === "status") currentStatus = val;
+      if (type === "character") currentCharacter = val;
+      updateActive(container, btn);
+      applyFilters();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function updateActive(container, activeBtn) {
+  container.querySelectorAll("button").forEach(btn =>
+    btn.classList.remove("active")
+  );
+  activeBtn.classList.add("active");
+}
+
+function renderGrid(list) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  list.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${item.image}" loading="lazy"
+       onerror="this.src='https://picsum.photos/300'">
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
+        <div class="price-row">
+          <div class="current-price">$${item.price}</div>
+          ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+        </div>
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
+      </div>
+    `;
+    card.onclick = () => openModal(item);
+    grid.appendChild(card);
+  });
+}
+
+function openModal(item) {
+  const modal = document.getElementById("modal");
+  const box = document.getElementById("modalBox");
+  box.innerHTML = `
+  <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
+  <h2>${item.title}</h2>
+  <div class="price-row">
+    <div class="current-price">$${item.price}</div>
+    ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+  </div>
+  <div class="badge">${item.status}</div>
+  <hr>
+  <p>作品：${item.work}</p>
+  <p>角色：${item.character}</p>
+  <p>類型：${item.type}</p>
+  <p>數量：${item.quantity}</p>
+  <p>平台：${item.platform}</p>
+  <p>備註：${item.note}</p>
+  <p>日期：${item.date}</p>
+`;
+
+  modal.style.display = "flex";
+}
+
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") {
+    e.currentTarget.style.display = "none";
+  }
+});
+</script>
+
+</body>
+</html>
+
