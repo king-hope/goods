@@ -96,6 +96,13 @@ header {
   margin: 6px 0;
 }
 
+/* 狀態顏色 */
+.badge.已到家 { background:#c8e6c9; color:#2e7d32; }
+.badge.已付款 { background:#fff9c4; color:#f9a825; }
+/.badge.缺貨   { background:#ffcdd2; color:#c62828; }/
+.badge.未付款 { background:#bbdefb; color:#1565c0; }
+
+
 .card-info {
   padding: 8px 10px 10px;
   display: flex;
@@ -176,6 +183,23 @@ function convertDriveLink(link) {
   return `https://lh3.googleusercontent.com/d/${match[0]}`;
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr; // 如果不是有效日期，就原樣顯示
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  // 星期陣列
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekday = weekdays[d.getDay()];
+
+  return `${year}/${month}/${day} (${weekday})`;
+}
+
+
 fetch(url)
   .then(res => res.json())
   .then(data => {
@@ -191,7 +215,8 @@ fetch(url)
       originalPrice: item["原價"] || "",
       platform: item["購買平台"] || "",
       note: item["備註"] || "",
-      date: item["日期"] || ""
+      date: formatDate(item["日期"])
+
     }));
     createFilters();
     renderGrid(allItems);
@@ -265,7 +290,7 @@ function renderGrid(list) {
           <div class="current-price">$${item.price}</div>
           ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
         </div>
-        <div class="badge">${item.status}</div>
+        <div class="badge ${item.status}">${item.status}</div>
         <div class="card-sub">${item.work} / ${item.character}</div>
       </div>
     `;
@@ -307,4 +332,3 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
-
