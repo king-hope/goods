@@ -99,7 +99,7 @@ header {
 /* 狀態顏色 */
 .badge.已到家 { background:#c8e6c9; color:#2e7d32; }
 .badge.已付款 { background:#fff9c4; color:#f9a825; }
-/.badge.缺貨   { background:#ffcdd2; color:#c62828; }/
+/* .badge.缺貨 { background:#ffcdd2; color:#c62828; } */
 .badge.未付款 { background:#bbdefb; color:#1565c0; }
 
 
@@ -215,7 +215,7 @@ fetch(url)
       originalPrice: item["原價"] || "",
       platform: item["購買平台"] || "",
       note: item["備註"] || "",
-      date: formatDate(item["日期"])
+      date: formatDate(item["日期"]),
       virtualSeries:
         item["類型"] === "扭蛋"
          ? `${item["作品"]}__${item["明細（標題）"]}`
@@ -361,3 +361,4 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
+
