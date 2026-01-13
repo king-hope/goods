@@ -231,14 +231,18 @@ fetch(url)
 function groupItemsBySeries(list) {
   const map = {};
 
-  list.forEach(item => {
-    const key = item.virtualSeries || Symbol();
+  list.forEach((item, index) => {
+    // 扭蛋 → 用 virtualSeries 合併
+    // 非扭蛋 → 用唯一 key，確保不被合併
+    const key = item.virtualSeries || `single_${index}`;
+
     if (!map[key]) map[key] = [];
     map[key].push(item);
   });
 
   return Object.values(map);
 }
+
 
 
 function createFilters() {
@@ -361,4 +365,5 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
+
 
