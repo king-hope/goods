@@ -216,12 +216,30 @@ fetch(url)
       platform: item["購買平台"] || "",
       note: item["備註"] || "",
       date: formatDate(item["日期"])
+      virtualSeries:
+        item["類型"] === "扭蛋"
+         ? `${item["作品"]}__${item["明細（標題）"]}`
+         : null
+
 
     }));
     createFilters();
     renderGrid(allItems);
   })
   .catch(err => console.error("資料讀取失敗：", err));
+
+function groupItemsBySeries(list) {
+  const map = {};
+
+  list.forEach(item => {
+    const key = item.virtualSeries || Symbol();
+    if (!map[key]) map[key] = [];
+    map[key].push(item);
+  });
+
+  return Object.values(map);
+}
+
 
 function createFilters() {
   const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
@@ -278,50 +296,61 @@ function updateActive(container, activeBtn) {
 function renderGrid(list) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
-  list.forEach(item => {
+
+  const groups = groupItemsBySeries(list);
+
+  groups.forEach(group => {
+    const first = group[0];
+    const total = group.length;
+    const owned = group.filter(g => g.status === "已在家").length;
+
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
-      <img src="${item.image}" loading="lazy"
-       onerror="this.src='https://picsum.photos/300'">
-      <div class="card-info">
-        <div class="card-title">${item.title}</div>
-        <div class="price-row">
-          <div class="current-price">$${item.price}</div>
-          ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
-        </div>
-        <div class="badge ${item.status}">${item.status}</div>
-        <div class="card-sub">${item.work} / ${item.character}</div>
-      </div>
+      <img src="${first.image}">
+      <div class="card-title">${first.title}</div>
+      ${
+        group.length > 1
+          ? `<div class="card-meta">共 ${total} 款｜已在家 ${owned}</div>`
+          : ""
+      }
     `;
-    card.onclick = () => openModal(item);
+
+    card.onclick = () => openModal(group);
     grid.appendChild(card);
   });
 }
 
-function openModal(item) {
+
+function openModal(data) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
+
+  const items = Array.isArray(data) ? data : [data];
+
+  const listHtml = items.map(i => `
+    <li>
+      ${i.character || "—"}
+      <span style="opacity:.7">（${i.status}）</span>
+    </li>
+  `).join("");
+
   box.innerHTML = `
-  <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
-  <h2>${item.title}</h2>
-  <div class="price-row">
-    <div class="current-price">$${item.price}</div>
-    ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
-  </div>
-  <div class="badge">${item.status}</div>
-  <hr>
-  <p>作品：${item.work}</p>
-  <p>角色：${item.character}</p>
-  <p>類型：${item.type}</p>
-  <p>數量：${item.quantity}</p>
-  <p>平台：${item.platform}</p>
-  <p>備註：${item.note}</p>
-  <p>日期：${item.date}</p>
-`;
+    <img src="${items[0].image}">
+    <h2>${items[0].title}</h2>
+    <p>作品：${items[0].work}</p>
+
+    ${
+      items.length > 1
+        ? `<h3>系列內容</h3><ul>${listHtml}</ul>`
+        : `<p>角色：${items[0].character}</p>`
+    }
+  `;
 
   modal.style.display = "flex";
 }
+
 
 document.getElementById("modal").addEventListener("click", e => {
   if (e.target.id === "modal") {
