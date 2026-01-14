@@ -619,6 +619,11 @@ function renderGrid(list) {
   });
 }
 
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
 function openModal(item) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
@@ -652,15 +657,15 @@ function openModal(item) {
 `;
 
 
-box.querySelector(".modal-close").onclick = () => {
-  modal.style.display = "none";
+box.querySelector(".modal-close").onclick = closeModal;
+
   document.body.classList.remove("modal-open");
 };
 
 modal.style.display = "flex";
 document.body.classList.add("modal-open");
 
-}
+
 
 function updateCharacterFilterByWork() {
   const characterDiv = document.getElementById("characterFilters");
@@ -708,10 +713,9 @@ function updateCharacterFilterByWork() {
 
 
 document.getElementById("modal").addEventListener("click", e => {
-  if (e.target.id === "modal") {
-    e.currentTarget.style.display = "none";
-  }
+  if (e.target.id === "modal") closeModal();
 });
+
 
 document.getElementById("searchInput").addEventListener("input", e => {
   currentSearch = e.target.value.trim().toLowerCase();
@@ -725,6 +729,35 @@ toggleBtn.addEventListener("click", () => {
   filtersWrapper.classList.toggle("show");
 });
 
+/* 手機詳情頁 下滑即可退出 */
+
+let touchStartY = 0;
+let touchCurrentY = 0;
+
+const modalBox = document.getElementById("modalBox");
+
+modalBox.addEventListener("touchstart", e => {
+  if (window.innerWidth > 768) return;
+  touchStartY = e.touches[0].clientY;
+});
+
+modalBox.addEventListener("touchmove", e => {
+  if (window.innerWidth > 768) return;
+  touchCurrentY = e.touches[0].clientY;
+});
+
+modalBox.addEventListener("touchend", () => {
+  if (window.innerWidth > 768) return;
+
+  const delta = touchCurrentY - touchStartY;
+
+  if (delta > 80 && modalBox.scrollTop === 0) {
+    closeModal();
+  }
+
+  touchStartY = 0;
+  touchCurrentY = 0;
+});
 
 
 
