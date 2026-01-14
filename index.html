@@ -660,10 +660,13 @@ function openModal(item) {
 box.querySelector(".modal-close").onclick = closeModal;
 
   document.body.classList.remove("modal-open");
-};
-
+  
 modal.style.display = "flex";
 document.body.classList.add("modal-open");
+
+};
+
+
 
 
 
@@ -759,6 +762,9 @@ modalBox.addEventListener("touchend", () => {
   touchCurrentY = 0;
 });
 
+document.getElementById("modalBox").addEventListener("click", e => {
+  e.stopPropagation();
+});
 
 
 </script>
