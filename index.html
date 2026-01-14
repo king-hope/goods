@@ -97,7 +97,7 @@ header {
 }
 
 /* 狀態顏色 */
-.badge.已到家 { background:#c8e6c9; color:#2e7d32; }
+.badge.已在家 { background:#c8e6c9; color:#2e7d32; }
 .badge.已付款 { background:#fff9c4; color:#f9a825; }
 /* .badge.缺貨 { background:#ffcdd2; color:#c62828; } */
 .badge.未付款 { background:#bbdefb; color:#1565c0; }
@@ -245,6 +245,7 @@ function groupItemsBySeries(list) {
 
 
 
+
 function createFilters() {
   const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
   const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
@@ -318,6 +319,10 @@ function renderGrid(list) {
         group.length > 1
           ? `<div class="card-meta">共 ${total} 款｜已在家 ${owned}</div>`
           : ""
+       
+}
+
+
       }
     `;
 
@@ -365,5 +370,4 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
-
 
