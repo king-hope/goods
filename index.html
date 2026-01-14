@@ -572,9 +572,6 @@ function openModal(item) {
   const box = document.getElementById("modalBox");
   box.innerHTML = `
   <button class="modal-close">返回</button>
-  box.querySelector(".modal-close").onclick = () => {
-  document.getElementById("modal").style.display = "none";
-};
   <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
   <h2>${item.title}</h2>
   <div class="price-row">
@@ -593,6 +590,10 @@ function openModal(item) {
   <p>備註：${item.note}</p>
   <p>日期：${item.date}</p>
 `;
+
+box.querySelector(".modal-close").onclick = () => {
+  document.getElementById("modal").style.display = "none";
+};
 
   modal.style.display = "flex";
 }
@@ -667,4 +668,3 @@ toggleBtn.addEventListener("click", () => {
 
 </body>
 </html>
-
