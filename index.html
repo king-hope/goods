@@ -71,6 +71,7 @@ header {
 }
 
 
+
 /* =====================
    搜尋欄
 ===================== */
@@ -283,6 +284,71 @@ header {
     font-size: 11px;
   }
 }
+
+#toggleFiltersBtn {
+  display: none;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #5c6bc0;
+  color: #fff;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  #toggleFiltersBtn {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  #filtersWrapper {
+    display: none;
+  }
+
+  #filtersWrapper.show {
+    display: block;
+  }
+}
+
+
+/*  手機端 返回按鍵  */
+.modal-close {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .modal-close {
+    display: block;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border: none;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #5c6bc0;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    z-index: 5;
+  }
+}
+
+
+/*手機端介面 滑出式*/
+
+@media (max-width: 768px) {
+  .modal {
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-height: 85%;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+
 </style>
 
 </head>
@@ -297,6 +363,10 @@ header {
     placeholder="搜尋標題或角色"
     autocomplete="off"
   >
+
+  <button id="toggleFiltersBtn">篩選</button>
+
+  <div id="filtersWrapper">
 
   <div class="filters" id="workFilters"></div>
   <div class="filters" id="statusFilters"></div>
@@ -501,11 +571,17 @@ function openModal(item) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
   box.innerHTML = `
+  <button class="modal-close">返回</button>
   <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
   <h2>${item.title}</h2>
   <div class="price-row">
     <div class="current-price">$${item.price}</div>
     ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+
+  box.querySelector(".modal-close").onclick = () => {
+  document.getElementById("modal").style.display = "none";
+};
+
   </div>
   <div class="badge">${item.status}</div>
   <hr>
@@ -577,11 +653,17 @@ document.getElementById("searchInput").addEventListener("input", e => {
   applyFilters();
 });
 
+const toggleBtn = document.getElementById("toggleFiltersBtn");
+const filtersWrapper = document.getElementById("filtersWrapper");
+
+toggleBtn.addEventListener("click", () => {
+  filtersWrapper.classList.toggle("show");
+});
+
+
 
 
 </script>
 
 </body>
 </html>
-
-
