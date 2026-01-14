@@ -252,7 +252,7 @@ fetch(url)
   .then(data => {
     allItems = data.map(item => ({
       work: (item["作品"] || "").trim(),
-      character: (item["角色"] || "").trim(),
+      character: (item["角色（扭蛋請填寫系列名稱）"] || "").trim(),
       title: (item["明細（標題）"] || "").trim(),
       type: (item["類型"] || "").trim(),
       image: convertDriveLink(item["照片"]),
@@ -261,7 +261,7 @@ fetch(url)
       price: (item["金額"] || "").toString().trim(),
       originalPrice: (item["原價"] || "").toString().trim(),
       platform: (item["購買平台"] || "").trim(),
-      note: (item["備註"] || "").trim(),
+      note: (item["備註（扭蛋請填角色名稱）"] || "").trim(),
       date: formatDate(item["日期"])
     }));
 
@@ -435,3 +435,4 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
+
