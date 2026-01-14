@@ -572,15 +572,15 @@ function openModal(item) {
   const box = document.getElementById("modalBox");
   box.innerHTML = `
   <button class="modal-close">返回</button>
+  box.querySelector(".modal-close").onclick = () => {
+  document.getElementById("modal").style.display = "none";
+};
   <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
   <h2>${item.title}</h2>
   <div class="price-row">
     <div class="current-price">$${item.price}</div>
     ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
 
-  box.querySelector(".modal-close").onclick = () => {
-  document.getElementById("modal").style.display = "none";
-};
 
   </div>
   <div class="badge">${item.status}</div>
@@ -667,3 +667,4 @@ toggleBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
