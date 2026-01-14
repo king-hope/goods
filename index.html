@@ -136,6 +136,11 @@ header {
   line-height: 1.4;
 }
 
+#typeFilters button {
+  background: #ede7f6;
+}
+
+
 @media (max-width: 768px) {
 
   header {
@@ -221,6 +226,7 @@ header {
 
   <div class="filters" id="workFilters"></div>
   <div class="filters" id="statusFilters"></div>
+  <div class="filters" id="typeFilters"></div>
   <div class="filters" id="characterFilters"></div>
 </header>
 
@@ -234,6 +240,7 @@ header {
 <script>
 let currentSearch = "";
 
+let currentType = "全部";
 let currentWork = "全部";
 let currentStatus = "全部";
 let currentCharacter = "全部";
@@ -249,6 +256,10 @@ function applyFilters() {
     result = result.filter(i => i.status === currentStatus);
   }
 
+  if (currentType !== "全部") {
+    result = result.filter(i => i.type === currentType);
+  }
+
   if (currentCharacter !== "全部") {
     result = result.filter(i => i.character === currentCharacter);
   }
@@ -262,6 +273,7 @@ function applyFilters() {
 
   renderGrid(result);
 }
+
 
 
 const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
@@ -319,18 +331,25 @@ fetch(url)
 function createFilters() {
   const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
   const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
+  const typeSet = new Set(allItems.map(i => i.type).filter(Boolean));
   const characterSet = new Set(allItems.map(i => i.character).filter(Boolean));
+
 
   const workDiv = document.getElementById("workFilters");
   const statusDiv = document.getElementById("statusFilters");
+  const typeDiv = document.getElementById("typeFilters");
   const characterDiv = document.getElementById("characterFilters");
+
 
   workDiv.innerHTML = "<strong>作品篩選：</strong>";
   statusDiv.innerHTML = "<strong>狀態篩選：</strong>";
+  typeDiv.innerHTML = "<strong>類型篩選：</strong>";
   characterDiv.innerHTML = "<strong>角色篩選：</strong>";
+
 
   addFilterButtons(workDiv, workSet, "work");
   addFilterButtons(statusDiv, statusSet, "status");
+  addFilterButtons(typeDiv, typeSet, "type");
   addFilterButtons(characterDiv, characterSet, "character");
 }
 
@@ -345,6 +364,7 @@ function addFilterButtons(container, set, type) {
   }
   if (type === "status") currentStatus = "全部";
   if (type === "character") currentCharacter = "全部";
+  if (type === "type") currentType = "全部";
 
   updateActive(container, allBtn);
   applyFilters();
@@ -362,6 +382,7 @@ function addFilterButtons(container, set, type) {
   }
   if (type === "status") currentStatus = val;
   if (type === "character") currentCharacter = val;
+  if (type === "type") currentType = val;
 
   updateActive(container, btn);
   applyFilters();
