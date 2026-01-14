@@ -135,6 +135,53 @@ header {
   line-height: 1.4;
 }
 
+@media (max-width: 768px) {
+
+  header {
+    padding: 12px 12px 8px;
+  }
+
+  header strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .filters {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filters button {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .card img {
+    height: 140px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-sub {
+    font-size: 11px;
+  }
+
+}
+
+
+
 
 </style>
 </head>
@@ -204,29 +251,24 @@ fetch(url)
   .then(res => res.json())
   .then(data => {
     allItems = data.map(item => ({
-      work: item["作品"] || "",
-      character: item["角色"] || "",
-      title: item["明細（標題）"] || "",
-      type: item["類型"] || "",
+      work: (item["作品"] || "").trim(),
+      character: (item["角色"] || "").trim(),
+      title: (item["明細（標題）"] || "").trim(),
+      type: (item["類型"] || "").trim(),
       image: convertDriveLink(item["照片"]),
-      quantity: item["數量"] || "",
-      status: item["狀態"] || "",
-      price: item["金額"] || "",
-      originalPrice: item["原價"] || "",
-      platform: item["購買平台"] || "",
-      note: item["備註"] || "",
+      quantity: (item["數量"] || "").toString().trim(),
+      status: (item["狀態"] || "").trim(),
+      price: (item["金額"] || "").toString().trim(),
+      originalPrice: (item["原價"] || "").toString().trim(),
+      platform: (item["購買平台"] || "").trim(),
+      note: (item["備註"] || "").trim(),
       date: formatDate(item["日期"])
-
     }));
+
     createFilters();
     renderGrid(allItems);
-
-character: (item["角色"] || "").trim(),
-work: (item["作品"] || "").trim(),
-status: (item["狀態"] || "").trim(),
-
-    
   })
+
   .catch(err => console.error("資料讀取失敗：", err));
 
 function createFilters() {
@@ -382,7 +424,6 @@ function updateCharacterFilterByWork() {
     updateActive(characterDiv, allBtn);
   }
 }
-
 
 
 document.getElementById("modal").addEventListener("click", e => {
