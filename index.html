@@ -312,19 +312,15 @@ function renderGrid(list) {
     const card = document.createElement("div");
     card.className = "card";
 
-    card.innerHTML = `
-      <img src="${first.image}">
-      <div class="card-title">${first.title}</div>
-      ${
-        group.length > 1
-          ? `<div class="card-meta">共 ${total} 款｜已在家 ${owned}</div>`
-          : ""
-       
-}
+    let metaHtml = "";
+    if (group.length > 1) {
+      metaHtml = `<div class="card-meta">共 ${total} 款｜已在家 ${owned}</div>`;
+    }
 
-
-      }
-    `;
+    card.innerHTML =
+      `<img src="${first.image}">` +
+      `<div class="card-title">${first.title}</div>` +
+      metaHtml;
 
     card.onclick = () => openModal(group);
     grid.appendChild(card);
@@ -332,33 +328,41 @@ function renderGrid(list) {
 }
 
 
+
 function openModal(data) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
 
   const items = Array.isArray(data) ? data : [data];
+  const first = items[0];
 
-  const listHtml = items.map(i => `
-    <li>
-      ${i.character || "—"}
-      <span style="opacity:.7">（${i.status}）</span>
-    </li>
-  `).join("");
+  let seriesHtml = "";
+  if (items.length > 1) {
+    seriesHtml =
+      "<h3>系列內容</h3><ul>" +
+      items.map(i =>
+        `<li>${i.character || "—"}（${i.status}）</li>`
+      ).join("") +
+      "</ul>";
+  }
 
-  box.innerHTML = `
-    <img src="${items[0].image}">
-    <h2>${items[0].title}</h2>
-    <p>作品：${items[0].work}</p>
-
-    ${
-      items.length > 1
-        ? `<h3>系列內容</h3><ul>${listHtml}</ul>`
-        : `<p>角色：${items[0].character}</p>`
-    }
-  `;
+  box.innerHTML =
+    `<img src="${first.image}">` +
+    `<h2>${first.title}</h2>` +
+    `<p>作品：${first.work}</p>` +
+    (items.length === 1 ? `<p>角色：${first.character}</p>` : "") +
+    seriesHtml +
+    `<p>狀態：${first.status}</p>` +
+    `<p>數量：${first.quantity}</p>` +
+    `<p>金額：${first.price}</p>` +
+    (first.originalPrice ? `<p>原價：${first.originalPrice}</p>` : "") +
+    `<p>平台：${first.platform}</p>` +
+    `<p>備註：${first.note}</p>` +
+    `<p>日期：${first.date}</p>`;
 
   modal.style.display = "flex";
 }
+
 
 
 document.getElementById("modal").addEventListener("click", e => {
