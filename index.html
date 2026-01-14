@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>我的周邊收藏</title>
 
+
 <style>
 body { margin:0; font-family:system-ui,sans-serif; background:#f2f2f2; }
 header {
@@ -181,6 +182,27 @@ header {
 }
 
 
+#searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+#searchInput:focus {
+  border-color: #5c6bc0;
+  box-shadow: 0 0 0 2px rgba(92,107,192,.15);
+}
+
+@media (max-width: 768px) {
+  #searchInput {
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+}
 
 
 </style>
@@ -189,10 +211,19 @@ header {
 <body>
 
 <header>
+
+  <input
+    type="search"
+    id="searchInput"
+    placeholder="搜尋標題或角色"
+    autocomplete="off"
+  >
+
   <div class="filters" id="workFilters"></div>
   <div class="filters" id="statusFilters"></div>
-  <div class="filters" id="characterFilters"></div> <!-- 新增角色篩選 -->
+  <div class="filters" id="characterFilters"></div>
 </header>
+
 
 <div class="grid" id="grid"></div>
 
@@ -201,23 +232,37 @@ header {
 </div>
 
 <script>
+let currentSearch = "";
+
 let currentWork = "全部";
 let currentStatus = "全部";
 let currentCharacter = "全部";
 
 function applyFilters() {
   let result = allItems;
+
   if (currentWork !== "全部") {
     result = result.filter(i => i.work === currentWork);
   }
+
   if (currentStatus !== "全部") {
     result = result.filter(i => i.status === currentStatus);
   }
+
   if (currentCharacter !== "全部") {
     result = result.filter(i => i.character === currentCharacter);
   }
+
+  if (currentSearch) {
+    result = result.filter(i =>
+      i.title.toLowerCase().includes(currentSearch) ||
+      i.character.toLowerCase().includes(currentSearch)
+    );
+  }
+
   renderGrid(result);
 }
+
 
 const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
 let allItems = [];
@@ -431,8 +476,15 @@ document.getElementById("modal").addEventListener("click", e => {
     e.currentTarget.style.display = "none";
   }
 });
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  currentSearch = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+
+
 </script>
 
 </body>
 </html>
-
