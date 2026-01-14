@@ -199,7 +199,9 @@ header {
   background: rgba(0,0,0,0.6);
   justify-content: center;
   align-items: center;
+  z-index: 1000; /* 關鍵 */
 }
+
 
 .modal-box {
   background: #fff;
@@ -367,16 +369,17 @@ header {
   }
 
   .modal-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-bottom: 1px solid #eee;
+   position: sticky;
+   top: 0;
+   z-index: 1001; /* 高於 header */
+   background: #fff;
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 12px 14px;
+   border-bottom: 1px solid #eee;
   }
+
 
   .modal-header button {
     border: none;
