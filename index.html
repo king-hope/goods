@@ -220,6 +220,12 @@ fetch(url)
     }));
     createFilters();
     renderGrid(allItems);
+
+character: (item["角色"] || "").trim(),
+work: (item["作品"] || "").trim(),
+status: (item["狀態"] || "").trim(),
+
+    
   })
   .catch(err => console.error("資料讀取失敗：", err));
 
@@ -344,15 +350,17 @@ function updateCharacterFilterByWork() {
   }
 
   // 該作品實際擁有的角色集合
-  const validCharacters = new Set(
-    allItems
-      .filter(i => i.work === currentWork)
-      .map(i => i.character)
-      .filter(Boolean)
-  );
+ const validCharacters = new Set(
+  allItems
+    .filter(i => i.work === currentWork)
+    .map(i => (i.character || "").trim())
+    .filter(Boolean)
+ );
+
 
   buttons.forEach(btn => {
-    const val = btn.textContent;
+    const val = btn.textContent.trim();
+
 
     // 「全部」永遠顯示
     if (val === "全部") {
