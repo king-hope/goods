@@ -97,9 +97,9 @@ header {
 }
 
 /* 狀態顏色 */
-.badge.已在家 { background:#c8e6c9; color:#2e7d32; }
+.badge.已到家 { background:#c8e6c9; color:#2e7d32; }
 .badge.已付款 { background:#fff9c4; color:#f9a825; }
-/* .badge.缺貨 { background:#ffcdd2; color:#c62828; } */
+/* .badge.缺貨   { background:#ffcdd2; color:#c62828; } */
 .badge.未付款 { background:#bbdefb; color:#1565c0; }
 
 
@@ -215,36 +215,13 @@ fetch(url)
       originalPrice: item["原價"] || "",
       platform: item["購買平台"] || "",
       note: item["備註"] || "",
-      date: formatDate(item["日期"]),
-      virtualSeries:
-        item["類型"] === "扭蛋"
-         ? `${item["作品"]}__${item["明細（標題）"]}`
-         : null
-
+      date: formatDate(item["日期"])
 
     }));
     createFilters();
     renderGrid(allItems);
   })
   .catch(err => console.error("資料讀取失敗：", err));
-
-function groupItemsBySeries(list) {
-  const map = {};
-
-  list.forEach((item, index) => {
-    // 扭蛋 → 用 virtualSeries 合併
-    // 非扭蛋 → 用唯一 key，確保不被合併
-    const key = item.virtualSeries || `single_${index}`;
-
-    if (!map[key]) map[key] = [];
-    map[key].push(item);
-  });
-
-  return Object.values(map);
-}
-
-
-
 
 function createFilters() {
   const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
@@ -269,24 +246,34 @@ function addFilterButtons(container, set, type) {
   allBtn.textContent = "全部";
   allBtn.classList.add("active");
   allBtn.onclick = () => {
-    if (type === "work") currentWork = "全部";
-    if (type === "status") currentStatus = "全部";
-    if (type === "character") currentCharacter = "全部";
-    updateActive(container, allBtn);
-    applyFilters();
-  };
+  if (type === "work") {
+    currentWork = "全部";
+    updateCharacterFilterByWork(); // ← 新增
+  }
+  if (type === "status") currentStatus = "全部";
+  if (type === "character") currentCharacter = "全部";
+
+  updateActive(container, allBtn);
+  applyFilters();
+};
+
   container.appendChild(allBtn);
 
   set.forEach(val => {
     const btn = document.createElement("button");
     btn.textContent = val;
     btn.onclick = () => {
-      if (type === "work") currentWork = val;
-      if (type === "status") currentStatus = val;
-      if (type === "character") currentCharacter = val;
-      updateActive(container, btn);
-      applyFilters();
-    };
+  if (type === "work") {
+    currentWork = val;
+    updateCharacterFilterByWork(); // ← 新增
+  }
+  if (type === "status") currentStatus = val;
+  if (type === "character") currentCharacter = val;
+
+  updateActive(container, btn);
+  applyFilters();
+};
+
     container.appendChild(btn);
   });
 }
@@ -301,66 +288,91 @@ function updateActive(container, activeBtn) {
 function renderGrid(list) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
-
-  const groups = groupItemsBySeries(list);
-
-  groups.forEach(group => {
-    const first = group[0];
-    const total = group.length;
-    const owned = group.filter(g => g.status === "已在家").length;
-
+  list.forEach(item => {
     const card = document.createElement("div");
     card.className = "card";
-
-    let metaHtml = "";
-    if (group.length > 1) {
-      metaHtml = `<div class="card-meta">共 ${total} 款｜已在家 ${owned}</div>`;
-    }
-
-    card.innerHTML =
-      `<img src="${first.image}">` +
-      `<div class="card-title">${first.title}</div>` +
-      metaHtml;
-
-    card.onclick = () => openModal(group);
+    card.innerHTML = `
+      <img src="${item.image}" loading="lazy"
+       onerror="this.src='https://picsum.photos/300'">
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
+        <div class="price-row">
+          <div class="current-price">$${item.price}</div>
+          ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+        </div>
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
+      </div>
+    `;
+    card.onclick = () => openModal(item);
     grid.appendChild(card);
   });
 }
 
-
-
-function openModal(data) {
+function openModal(item) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
-
-  const items = Array.isArray(data) ? data : [data];
-  const first = items[0];
-
-  let seriesHtml = "";
-  if (items.length > 1) {
-    seriesHtml =
-      "<h3>系列內容</h3><ul>" +
-      items.map(i =>
-        `<li>${i.character || "—"}（${i.status}）</li>`
-      ).join("") +
-      "</ul>";
-  }
-
-  box.innerHTML =
-    `<img src="${first.image}">` +
-    `<h2>${first.title}</h2>` +
-    `<p>作品：${first.work}</p>` +
-    (items.length === 1 ? `<p>角色：${first.character}</p>` : "") +
-    seriesHtml +
-    `<p>狀態：${first.status}</p>` +
-    `<p>數量：${first.quantity}</p>` +
-    `<p>金額：${first.price}</p>` +
-    (first.originalPrice ? `<p>原價：${first.originalPrice}</p>` : "") +
-    `<p>平台：${first.platform}</p>` +
-    `<p>備註：${first.note}</p>` +
-    `<p>日期：${first.date}</p>`;
+  box.innerHTML = `
+  <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
+  <h2>${item.title}</h2>
+  <div class="price-row">
+    <div class="current-price">$${item.price}</div>
+    ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+  </div>
+  <div class="badge">${item.status}</div>
+  <hr>
+  <p>作品：${item.work}</p>
+  <p>角色：${item.character}</p>
+  <p>類型：${item.type}</p>
+  <p>數量：${item.quantity}</p>
+  <p>平台：${item.platform}</p>
+  <p>備註：${item.note}</p>
+  <p>日期：${item.date}</p>
+`;
 
   modal.style.display = "flex";
+}
+
+function updateCharacterFilterByWork() {
+  const characterDiv = document.getElementById("characterFilters");
+  const buttons = characterDiv.querySelectorAll("button");
+
+  // 若作品為「全部」，顯示全部角色
+  if (currentWork === "全部") {
+    buttons.forEach(btn => btn.style.display = "");
+    return;
+  }
+
+  // 該作品實際擁有的角色集合
+  const validCharacters = new Set(
+    allItems
+      .filter(i => i.work === currentWork)
+      .map(i => i.character)
+      .filter(Boolean)
+  );
+
+  buttons.forEach(btn => {
+    const val = btn.textContent;
+
+    // 「全部」永遠顯示
+    if (val === "全部") {
+      btn.style.display = "";
+      return;
+    }
+
+    // 不在該作品內的角色 → 隱藏
+    btn.style.display = validCharacters.has(val) ? "" : "none";
+  });
+
+  // 若目前選的角色已不屬於此作品，自動重置
+  if (
+    currentCharacter !== "全部" &&
+    !validCharacters.has(currentCharacter)
+  ) {
+    currentCharacter = "全部";
+    const allBtn = characterDiv.querySelector("button");
+    updateActive(characterDiv, allBtn);
+  }
 }
 
 
@@ -374,4 +386,3 @@ document.getElementById("modal").addEventListener("click", e => {
 
 </body>
 </html>
-
