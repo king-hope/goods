@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的周邊收藏</title>
+
+
+<style>
+/* =====================
+   基本設定 / Theme
+===================== */
+:root {
+  --bg-main: #f2f2f2;
+  --bg-card: #ffffff;
+  --primary: #5c6bc0;
+  --text-main: #333;
+  --text-sub: #666;
+  --border-light: #ddd;
+  --shadow-soft: 0 2px 6px rgba(0,0,0,0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+
+/* =====================
+   Header & Filters
+===================== */
+header {
+  background: #fff;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filters {
+  margin-bottom: 8px;
+}
+
+.filters button {
+  margin: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #e0e0e0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+.filters button:hover {
+  background: #cfcfcf;
+}
+
+.filters button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+
+
+/* =====================
+   搜尋欄
+===================== */
+#searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  outline: none;
+}
+
+#searchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(92,107,192,.15);
+}
+
+
+/* =====================
+   Grid / Card
+===================== */
+.grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform .15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-title {
+  font-size: 14px;
+  text-align: center;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+
+/* =====================
+   Badge（狀態）
+===================== */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 6px 0;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* 狀態顏色 */
+.badge.已到家 {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.badge.已付款 {
+  background: #fff9c4;
+  color: #f9a825;
+}
+
+.badge.未付款 {
+  background: #bbdefb;
+  color: #1565c0;
+}
+
+
+/* =====================
+   價格顯示
+===================== */
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.current-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.original-price {
+  font-size: 13px;
+  color: #9e9e9e;
+}
+
+
+/* =====================
+   Modal
+===================== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #fff;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.modal-box img {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.modal-box h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.modal-box p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-box .price-row {
+  margin: 8px 0;
+}
+
+
+/* =====================
+   Mobile（APP 風格）
+===================== */
+@media (max-width: 768px) {
+
+  header {
+    padding: 12px 12px 8px;
+  }
+
+  header strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .filters {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filters button {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  #searchInput {
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .card img {
+    height: 140px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-sub {
+    font-size: 11px;
+  }
+}
+
+#toggleFiltersBtn {
+  display: none;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #5c6bc0;
+  color: #fff;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  #toggleFiltersBtn {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  #filtersWrapper {
+    display: none;
+  }
+
+  #filtersWrapper.show {
+    display: block;
+  }
+}
+
+
+/*  手機端 返回按鍵  */
+.modal-close {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .modal-close {
+    display: block;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border: none;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #5c6bc0;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    z-index: 5;
+  }
+}
+
+
+/*手機端介面 滑出式*/
+
+@media (max-width: 768px) {
+  .modal {
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-height: 85%;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+  <input
+    type="search"
+    id="searchInput"
+    placeholder="搜尋標題或角色"
+    autocomplete="off"
+  >
+
+  <button id="toggleFiltersBtn">篩選</button>
+
+  <div id="filtersWrapper">
+
+  <div class="filters" id="workFilters"></div>
+  <div class="filters" id="statusFilters"></div>
+  <div class="filters" id="typeFilters"></div>
+  <div class="filters" id="characterFilters"></div>
+</header>
+
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script>
+let currentSearch = "";
+
+let currentType = "全部";
+let currentWork = "全部";
+let currentStatus = "全部";
+let currentCharacter = "全部";
+
+function applyFilters() {
+  let result = allItems;
+
+  if (currentWork !== "全部") {
+    result = result.filter(i => i.work === currentWork);
+  }
+
+  if (currentStatus !== "全部") {
+    result = result.filter(i => i.status === currentStatus);
+  }
+
+  if (currentType !== "全部") {
+    result = result.filter(i => i.type === currentType);
+  }
+
+  if (currentCharacter !== "全部") {
+    result = result.filter(i => i.character === currentCharacter);
+  }
+
+  if (currentSearch) {
+    result = result.filter(i =>
+      i.title.toLowerCase().includes(currentSearch) ||
+      i.character.toLowerCase().includes(currentSearch)
+    );
+  }
+
+  renderGrid(result);
+}
+
+
+
+const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
+let allItems = [];
+
+/* Google Drive 圖片轉換 */
+function convertDriveLink(link) {
+  if (!link) return "";
+  const match = link.match(/[-\w]{25,}/);
+  if (!match) return link;
+  return `https://lh3.googleusercontent.com/d/${match[0]}`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr; // 如果不是有效日期，就原樣顯示
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  // 星期陣列
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const weekday = weekdays[d.getDay()];
+
+  return `${year}/${month}/${day} (${weekday})`;
+}
+
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => {
+    allItems = data.map(item => ({
+      work: (item["作品"] || "").trim(),
+      character: (item["角色（扭蛋請填寫系列名稱）"] || "").trim(),
+      title: (item["明細（標題）"] || "").trim(),
+      type: (item["類型"] || "").trim(),
+      image: convertDriveLink(item["照片"]),
+      quantity: (item["數量"] || "").toString().trim(),
+      status: (item["狀態"] || "").trim(),
+      price: (item["金額"] || "").toString().trim(),
+      originalPrice: (item["原價"] || "").toString().trim(),
+      platform: (item["購買平台"] || "").trim(),
+      note: (item["備註（扭蛋請填角色名稱）"] || "").trim(),
+      date: formatDate(item["日期"])
+    }));
+
+    createFilters();
+    renderGrid(allItems);
+  })
+
+  .catch(err => console.error("資料讀取失敗：", err));
+
+function createFilters() {
+  const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
+  const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
+  const typeSet = new Set(allItems.map(i => i.type).filter(Boolean));
+  const characterSet = new Set(allItems.map(i => i.character).filter(Boolean));
+
+
+  const workDiv = document.getElementById("workFilters");
+  const statusDiv = document.getElementById("statusFilters");
+  const typeDiv = document.getElementById("typeFilters");
+  const characterDiv = document.getElementById("characterFilters");
+
+
+  workDiv.innerHTML = "<strong>作品篩選：</strong>";
+  statusDiv.innerHTML = "<strong>狀態篩選：</strong>";
+  typeDiv.innerHTML = "<strong>類型篩選：</strong>";
+  characterDiv.innerHTML = "<strong>角色篩選：</strong>";
+
+
+  addFilterButtons(workDiv, workSet, "work");
+  addFilterButtons(statusDiv, statusSet, "status");
+  addFilterButtons(typeDiv, typeSet, "type");
+  addFilterButtons(characterDiv, characterSet, "character");
+}
+
+function addFilterButtons(container, set, type) {
+  const allBtn = document.createElement("button");
+  allBtn.textContent = "全部";
+  allBtn.classList.add("active");
+  allBtn.onclick = () => {
+  if (type === "work") {
+    currentWork = "全部";
+    updateCharacterFilterByWork(); // ← 新增
+  }
+  if (type === "status") currentStatus = "全部";
+  if (type === "character") currentCharacter = "全部";
+  if (type === "type") currentType = "全部";
+
+  updateActive(container, allBtn);
+  applyFilters();
+};
+
+  container.appendChild(allBtn);
+
+  set.forEach(val => {
+    const btn = document.createElement("button");
+    btn.textContent = val;
+    btn.onclick = () => {
+  if (type === "work") {
+    currentWork = val;
+    updateCharacterFilterByWork(); // ← 新增
+  }
+  if (type === "status") currentStatus = val;
+  if (type === "character") currentCharacter = val;
+  if (type === "type") currentType = val;
+
+  updateActive(container, btn);
+  applyFilters();
+};
+
+    container.appendChild(btn);
+  });
+}
+
+function updateActive(container, activeBtn) {
+  container.querySelectorAll("button").forEach(btn =>
+    btn.classList.remove("active")
+  );
+  activeBtn.classList.add("active");
+}
+
+function renderGrid(list) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  list.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${item.image}" loading="lazy"
+       onerror="this.src='https://picsum.photos/300'">
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
+        <div class="price-row">
+          <div class="current-price">$${item.price}</div>
+          ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+        </div>
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
+      </div>
+    `;
+    card.onclick = () => openModal(item);
+    grid.appendChild(card);
+  });
+}
+
+function openModal(item) {
+  const modal = document.getElementById("modal");
+  const box = document.getElementById("modalBox");
+  box.innerHTML = `
+  <button class="modal-close">返回</button>
+  <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
+  <h2>${item.title}</h2>
+  <div class="price-row">
+    <div class="current-price">$${item.price}</div>
+    ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+
+
+  </div>
+  <div class="badge">${item.status}</div>
+  <hr>
+  <p>作品：${item.work}</p>
+  <p>角色：${item.character}</p>
+  <p>類型：${item.type}</p>
+  <p>數量：${item.quantity}</p>
+  <p>平台：${item.platform}</p>
+  <p>備註：${item.note}</p>
+  <p>日期：${item.date}</p>
+`;
+
+box.querySelector(".modal-close").onclick = () => {
+  document.getElementById("modal").style.display = "none";
+};
+
+  modal.style.display = "flex";
+}
+
+function updateCharacterFilterByWork() {
+  const characterDiv = document.getElementById("characterFilters");
+  const buttons = characterDiv.querySelectorAll("button");
+
+  // 若作品為「全部」，顯示全部角色
+  if (currentWork === "全部") {
+    buttons.forEach(btn => btn.style.display = "");
+    return;
+  }
+
+  // 該作品實際擁有的角色集合
+ const validCharacters = new Set(
+  allItems
+    .filter(i => i.work === currentWork)
+    .map(i => (i.character || "").trim())
+    .filter(Boolean)
+ );
+
+
+  buttons.forEach(btn => {
+    const val = btn.textContent.trim();
+
+
+    // 「全部」永遠顯示
+    if (val === "全部") {
+      btn.style.display = "";
+      return;
+    }
+
+    // 不在該作品內的角色 → 隱藏
+    btn.style.display = validCharacters.has(val) ? "" : "none";
+  });
+
+  // 若目前選的角色已不屬於此作品，自動重置
+  if (
+    currentCharacter !== "全部" &&
+    !validCharacters.has(currentCharacter)
+  ) {
+    currentCharacter = "全部";
+    const allBtn = characterDiv.querySelector("button");
+    updateActive(characterDiv, allBtn);
+  }
+}
+
+
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") {
+    e.currentTarget.style.display = "none";
+  }
+});
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  currentSearch = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+const toggleBtn = document.getElementById("toggleFiltersBtn");
+const filtersWrapper = document.getElementById("filtersWrapper");
+
+toggleBtn.addEventListener("click", () => {
+  filtersWrapper.classList.toggle("show");
+});
+
+
+
+
+</script>
+
+</body>
+</html>
