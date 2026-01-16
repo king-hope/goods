@@ -265,6 +265,11 @@ header {
     padding: 6px 10px;
   }
 
+  .filter-btn.active {
+  background: #222;
+  color: #fff;
+}
+
   #searchInput {
     font-size: 15px;
     padding: 12px 14px;
@@ -438,25 +443,41 @@ header {
 <script>
 let currentSearch = "";
 
-let currentType = "全部";
-let currentWork = "全部";
-let currentStatus = "全部";
-let currentCharacter = "全部";
+let selectedWorks = [];
+let selectedCharacters = [];
+let selectedStatuses = [];
+let selectedTypes = [];
+
+function toggleSelection(array, value) {
+  const index = array.indexOf(value);
+  if (index === -1) {
+    array.push(value);      // 未選 → 加入
+  } else {
+    array.splice(index, 1); // 已選 → 移除
+  }
+}
+
+
 
 function applyFilters() {
   let result = allItems;
 
-  if (currentWork !== "全部") {
-    result = result.filter(i => i.work === currentWork);
-  }
+  if (selectedWorks.length > 0) {
+  result = result.filter(i => selectedWorks.includes(i.work));
+}
 
-  if (currentStatus !== "全部") {
-    result = result.filter(i => i.status === currentStatus);
-  }
+if (selectedCharacters.length > 0) {
+  result = result.filter(i => selectedCharacters.includes(i.character));
+}
 
-  if (currentCharacter !== "全部") {
-    result = result.filter(i => i.character === currentCharacter);
-  }
+if (selectedStatuses.length > 0) {
+  result = result.filter(i => selectedStatuses.includes(i.status));
+}
+
+if (selectedTypes.length > 0) {
+  result = result.filter(i => selectedTypes.includes(i.type));
+}
+
 
   if (searchKeyword) {
     result = result.filter(i => {
@@ -471,6 +492,15 @@ function applyFilters() {
   renderGrid(result);
 }
 
+function getAvailableCharacters() {
+  if (selectedWorks.length === 0) return allCharacters;
+
+  return allCharacters.filter(c =>
+    allItems.some(i =>
+      selectedWorks.includes(i.work) && i.character === c
+    )
+  );
+}
 
 
 
@@ -573,11 +603,12 @@ function addFilterButtons(container, set, type) {
   set.forEach(val => {
     const btn = document.createElement("button");
     btn.textContent = val;
-    btn.onclick = () => {
-  if (type === "work") {
-    currentWork = val;
-    updateCharacterFilterByWork(); // ← 新增
-  }
+    button.onclick = () => {
+  toggleSelection(selectedWorks, work);
+  updateButtonState(button, selectedWorks.includes(work));
+  applyFilters();
+};
+
   if (type === "status") currentStatus = val;
   if (type === "character") currentCharacter = val;
   if (type === "type") currentType = val;
@@ -587,8 +618,12 @@ function addFilterButtons(container, set, type) {
 };
 
     container.appendChild(btn);
-  });
+  };
+
+function updateButtonState(button, isActive) {
+  button.classList.toggle("active", isActive);
 }
+
 
 function updateActive(container, activeBtn) {
   container.querySelectorAll("button").forEach(btn =>
@@ -775,4 +810,3 @@ document.getElementById("modalBox").addEventListener("click", e => {
 
 </body>
 </html>
-
