@@ -590,6 +590,17 @@ fetch(url)
 
   .catch(err => console.error("資料讀取失敗：", err));
 
+function formatPrice(amount, currency) {
+  if (!amount || !currency) return "";
+  return new Intl.NumberFormat("zh-TW", {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+
+
 function createFilters() {
   const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
   const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
