@@ -319,7 +319,16 @@ header {
     display: block;
   }
 
-
+  @media (max-width: 768px) {
+  #filtersWrapper {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 20;
+    padding: 16px;
+    overflow-y: auto;
+  }
+}
 }
 
 
@@ -704,9 +713,12 @@ function openModal(item) {
       </div>
 
       <p>作品：${item.work}</p>
-      <p>角色：${item.character}</p>
-      <p>類型：${item.type}</p>
-      <p>備註：${item.note}</p>
+    <p>角色：${item.character}</p>
+    <p>類型：${item.type}</p>
+    <p>數量：${item.quantity}</p>
+    <p>平台：${item.platform}</p>
+    <p>備註：${item.note}</p>
+    <p>日期：${item.date}</p>
     </div>
   `;
 
@@ -765,7 +777,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
 
 
 
