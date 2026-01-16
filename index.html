@@ -477,7 +477,6 @@ function toggleSelection(array, value) {
 function applyFilters() {
   syncCharacterFiltersByWorks();
 
-  let result = [...allItems];
 
   if (selectedWorks.length)
     result = result.filter(i => selectedWorks.includes(i.work));
@@ -636,7 +635,7 @@ function renderGrid(list) {
           item.price
             ? formatPrice(
                 item.price,
-                currencyMap[item.priceCurrencyText]
+                currencySymbolMap[item.priceCurrencyText]
               )
             : ""
         }
@@ -647,7 +646,7 @@ function renderGrid(list) {
           ? `<div class="original-price">
               ${formatPrice(
                 item.originalPrice,
-                currencyMap[item.originalCurrencyText]
+                currencySymbolMap[item.originalCurrencyText]
               )}
             </div>`
           : ""
@@ -724,7 +723,7 @@ function openModal(item) {
     <div class="current-price">
      ${formatPrice(
      item.price,
-     currencyMap[item.priceCurrencyText]
+     currencySymbolMap[item.priceCurrencyText]
      )}
    
  
@@ -1181,7 +1180,7 @@ let selectedStatuses = [];
 let selectedTypes = [];
 
 /* ===== 幣值中文 → ISO 代碼 對照 ===== */
-const currencyMap = {
+const currencySymbolMap = {
   "新台幣": "TWD",
   "台幣": "TWD",
   "人民幣": "CNY",
@@ -1401,7 +1400,7 @@ function openModal(item) {
     <div class="current-price">
      ${formatPrice(
      item.price,
-     currencyMap[item.priceCurrencyText]
+     currencySymbolMap[item.priceCurrencyText]
      )}
    
  
