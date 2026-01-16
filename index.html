@@ -740,44 +740,11 @@ function openModal(item) {
 
 
 
-
-
 function closeModal() {
   document.getElementById("modal").style.display = "none";
   document.body.classList.remove("modal-open");
 }
 
-function openModal(item) {
-  const modal = document.getElementById("modal");
-  const box = document.getElementById("modalBox");
-
-  box.innerHTML = `
-    <div class="modal-header">
-      <button class="modal-close">← 返回</button>
-      <strong>詳細資料</strong>
-    </div>
-    <div class="modal-content">
-      <img src="${item.image}">
-      <h2>${item.title}</h2>
-      <p>作品：${item.work}</p>
-      <p>角色：${item.character}</p>
-      <p>類型：${item.type}</p>
-      <p>備註：${item.note}</p>
-    </div>
-    <div class="current-price">
-     ${formatPrice(
-     item.price,
-     currencySymbolMap[item.priceCurrencyText]
-     )}
-   
- 
-    </div>
-  `;
-
-  box.querySelector(".modal-close").onclick = closeModal;
-  modal.style.display = "flex";
-  document.body.classList.add("modal-open");
-}
 
 /* =========================
    搜尋
