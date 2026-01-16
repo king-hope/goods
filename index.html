@@ -623,32 +623,39 @@ function renderGrid(list) {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
-      <div class="card-info">
-      <div class="card-title">${item.title}</div>
-        <div class="badge ${item.status}">${item.status}</div>
-        <div class="card-sub">${item.work} / ${item.character}</div>
+  <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
+
+  <div class="card-info">
+    <div class="card-title">${item.title}</div>
+
+    <div class="price-row">
+      <div class="current-price">
+        ${
+          item.price
+            ? formatPrice(
+                item.price,
+                currencyMap[item.priceCurrencyText]
+              )
+            : ""
+        }
       </div>
-    `;
-    <div class="current-price">
-  ${
-    item.price
-      ? formatPrice(
-          item.price,
-          currencyMap[item.priceCurrencyText]
-        )
-      : ""
-  }
-</div>
-${item.originalPrice
-  ? `<div class="original-price">
-      ${formatPrice(
-        item.originalPrice,
-        currencyMap[item.originalCurrencyText]
-      )}
-     </div>`
-  : ""
-}
+
+      ${
+        item.originalPrice
+          ? `<div class="original-price">
+              ${formatPrice(
+                item.originalPrice,
+                currencyMap[item.originalCurrencyText]
+              )}
+            </div>`
+          : ""
+      }
+    </div>
+
+    <div class="badge ${item.status}">${item.status}</div>
+    <div class="card-sub">${item.work} / ${item.character}</div>
+  </div>
+`;
 
     card.onclick = () => openModal(item);
     grid.appendChild(card);
@@ -1417,6 +1424,7 @@ modalBox.addEventListener("touchend", e => {
 
 </body>
 </html>
+
 
 
 
