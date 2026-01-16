@@ -477,6 +477,7 @@ function toggleSelection(array, value) {
 function applyFilters() {
   syncCharacterFiltersByWorks();
 
+  let result = [...allItems]; // ← 一定要有
 
   if (selectedWorks.length)
     result = result.filter(i => selectedWorks.includes(i.work));
@@ -500,6 +501,7 @@ function applyFilters() {
 
   renderGrid(result);
 }
+
 
 /* =========================
    角色依作品動態顯示
@@ -623,82 +625,48 @@ function renderGrid(list) {
   list.forEach(item => {
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
-  <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
+      <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
 
-  <div class="card-info">
-    <div class="card-title">${item.title}</div>
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
 
-    <div class="price-row">
-      <div class="current-price">
-        ${
-          item.price
-            ? formatPrice(
-                item.price,
-                currencySymbolMap[item.priceCurrencyText]
-              )
-            : ""
-        }
+        <div class="price-row">
+          <div class="current-price">
+            ${formatPrice(item.price, item.priceCurrencyText)}
+          </div>
+
+          ${
+            item.originalPrice
+              ? `<div class="original-price">
+                   ${formatPrice(item.originalPrice, item.originalCurrencyText)}
+                 </div>`
+              : ""
+          }
+        </div>
+
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
       </div>
-
-      ${
-        item.originalPrice
-          ? `<div class="original-price">
-              ${formatPrice(
-                item.originalPrice,
-                currencySymbolMap[item.originalCurrencyText]
-              )}
-            </div>`
-          : ""
-      }
-    </div>
-
-    <div class="badge ${item.status}">${item.status}</div>
-    <div class="card-sub">${item.work} / ${item.character}</div>
-  </div>
-`;
+    `;
 
     card.onclick = () => openModal(item);
     grid.appendChild(card);
   });
 }
 
-function formatPriceText(amount, currencyText) {
-  if (!amount) return "";
-  const symbol = currencySymbolMap[currencyText] || currencyText;
-  return `${symbol}${amount}`;
-
-
-  // 若幣值不存在或無法對應，直接顯示原始數字
-  if (!currency) {
-    return amount;
-  }
-
-  try {
-    return new Intl.NumberFormat("zh-TW", {
-      style: "currency",
-      currency: currency,
-      maximumFractionDigits: 0
-    }).format(Number(amount));
-  } catch (e) {
-    console.error("formatPrice error:", amount, currency);
-    return amount;
-  }
-}
-
-
-function displayPrice(amount, currencyText) {
+function formatPrice(amount, currencyText) {
   if (!amount) return "";
 
   const symbol = currencySymbolMap[currencyText] || "";
 
-  // 沒填幣值 → 只顯示數字
-  if (!currencyText) {
-    return amount;
-  }
-
-  return `${currencyText} ${symbol}${amount}`;
+  // 顯示格式：新台幣 NT$250 / 人民幣 ¥25
+  return currencyText
+    ? `${currencyText} ${symbol}${amount}`
+    : `${amount}`;
 }
+
 
 
 function closeModal() {
@@ -715,21 +683,28 @@ function openModal(item) {
       <button class="modal-close">← 返回</button>
       <strong>詳細資料</strong>
     </div>
+
     <div class="modal-content">
       <img src="${item.image}">
       <h2>${item.title}</h2>
+
+      <div class="price-row">
+        <div class="current-price">
+          ${formatPrice(item.price, item.priceCurrencyText)}
+        </div>
+        ${
+          item.originalPrice
+            ? `<div class="original-price">
+                 ${formatPrice(item.originalPrice, item.originalCurrencyText)}
+               </div>`
+            : ""
+        }
+      </div>
+
       <p>作品：${item.work}</p>
       <p>角色：${item.character}</p>
       <p>類型：${item.type}</p>
       <p>備註：${item.note}</p>
-    </div>
-    <div class="current-price">
-     ${formatPrice(
-     item.price,
-     currencySymbolMap[item.priceCurrencyText]
-     )}
-   
- 
     </div>
   `;
 
@@ -737,6 +712,7 @@ function openModal(item) {
   modal.style.display = "flex";
   document.body.classList.add("modal-open");
 }
+
 
 
 
