@@ -441,7 +441,7 @@ header {
 </div>
 
 <script>
-let currentSearch = "";
+let searchKeyword = "";
 
 let selectedWorks = [];
 let selectedCharacters = [];
@@ -460,37 +460,71 @@ function toggleSelection(array, value) {
 
 
 function applyFilters() {
-  let result = allItems;
+  syncCharacterFiltersByWorks(); // 保證角色狀態一致
 
-  if (selectedWorks.length > 0) {
-  result = result.filter(i => selectedWorks.includes(i.work));
-}
+  let result = [...allItems];
 
-if (selectedCharacters.length > 0) {
-  result = result.filter(i => selectedCharacters.includes(i.character));
-}
+  if (selectedWorks.length)
+    result = result.filter(i => selectedWorks.includes(i.work));
 
-if (selectedStatuses.length > 0) {
-  result = result.filter(i => selectedStatuses.includes(i.status));
-}
+  if (selectedCharacters.length)
+    result = result.filter(i => selectedCharacters.includes(i.character));
 
-if (selectedTypes.length > 0) {
-  result = result.filter(i => selectedTypes.includes(i.type));
-}
+  if (selectedStatuses.length)
+    result = result.filter(i => selectedStatuses.includes(i.status));
 
+  if (selectedTypes.length)
+    result = result.filter(i => selectedTypes.includes(i.type));
 
   if (searchKeyword) {
-    result = result.filter(i => {
-      return (
-        (i.title && i.title.toLowerCase().includes(searchKeyword)) ||
-        (i.character && i.character.toLowerCase().includes(searchKeyword)) ||
-        (i.note && i.note.toLowerCase().includes(searchKeyword))
-      );
-    });
+    result = result.filter(i =>
+      (i.title || "").toLowerCase().includes(searchKeyword) ||
+      (i.character || "").toLowerCase().includes(searchKeyword) ||
+      (i.note || "").toLowerCase().includes(searchKeyword)
+    );
   }
 
   renderGrid(result);
 }
+
+function syncCharacterFiltersByWorks() {
+  const characterContainer = document.getElementById("characterFilters");
+  const buttons = characterContainer.querySelectorAll("button");
+
+  // 若未選任何作品 → 顯示全部角色
+  if (selectedWorks.length === 0) {
+    buttons.forEach(btn => {
+      btn.style.display = "";
+    });
+    return;
+  }
+
+  // 目前作品對應的角色集合
+  const validCharacters = new Set(
+    allItems
+      .filter(item => selectedWorks.includes(item.work))
+      .map(item => item.character)
+      .filter(Boolean)
+  );
+
+  buttons.forEach(btn => {
+    const role = btn.textContent.trim();
+
+    if (validCharacters.has(role)) {
+      btn.style.display = "";
+    } else {
+      btn.style.display = "none";
+
+      // 若此角色已被選中，則自動取消
+      const idx = selectedCharacters.indexOf(role);
+      if (idx !== -1) {
+        selectedCharacters.splice(idx, 1);
+        btn.classList.remove("active");
+      }
+    }
+  });
+}
+
 
 function getAvailableCharacters() {
   if (selectedWorks.length === 0) return allCharacters;
@@ -562,63 +596,49 @@ function createFilters() {
   const typeSet = new Set(allItems.map(i => i.type).filter(Boolean));
   const characterSet = new Set(allItems.map(i => i.character).filter(Boolean));
 
-
-  const workDiv = document.getElementById("workFilters");
-  const statusDiv = document.getElementById("statusFilters");
-  const typeDiv = document.getElementById("typeFilters");
-  const characterDiv = document.getElementById("characterFilters");
-
-
-  workDiv.innerHTML = "<strong>作品篩選：</strong>";
-  statusDiv.innerHTML = "<strong>狀態篩選：</strong>";
-  typeDiv.innerHTML = "<strong>類型篩選：</strong>";
-  characterDiv.innerHTML = "<strong>角色篩選：</strong>";
-
-
-  addFilterButtons(workDiv, workSet, "work");
-  addFilterButtons(statusDiv, statusSet, "status");
-  addFilterButtons(typeDiv, typeSet, "type");
-  addFilterButtons(characterDiv, characterSet, "character");
+  addFilterButtons(document.getElementById("workFilters"), workSet, "work");
+  addFilterButtons(document.getElementById("statusFilters"), statusSet, "status");
+  addFilterButtons(document.getElementById("typeFilters"), typeSet, "type");
+  addFilterButtons(document.getElementById("characterFilters"), characterSet, "character");
 }
 
-function addFilterButtons(container, set, type) {
-  const allBtn = document.createElement("button");
-  allBtn.textContent = "全部";
-  allBtn.classList.add("active");
-  allBtn.onclick = () => {
-  if (type === "work") {
-    currentWork = "全部";
-    updateCharacterFilterByWork(); // ← 新增
-  }
-  if (type === "status") currentStatus = "全部";
-  if (type === "character") currentCharacter = "全部";
-  if (type === "type") currentType = "全部";
 
-  updateActive(container, allBtn);
-  applyFilters();
-};
-
-  container.appendChild(allBtn);
-
-  set.forEach(val => {
+function addFilterButtons(container, values, type) {
+  values.forEach(val => {
     const btn = document.createElement("button");
     btn.textContent = val;
-    button.onclick = () => {
-  toggleSelection(selectedWorks, work);
-  updateButtonState(button, selectedWorks.includes(work));
-  applyFilters();
-};
+    btn.classList.add("filter-btn");
 
-  if (type === "status") currentStatus = val;
-  if (type === "character") currentCharacter = val;
-  if (type === "type") currentType = val;
+    btn.onclick = () => {
+      if (type === "work") {
+       toggleSelection(selectedWorks, val);
+       btn.classList.toggle("active", selectedWorks.includes(val));
 
-  updateActive(container, btn);
-  applyFilters();
-};
+       syncCharacterFiltersByWorks(); // ⭐ 新增
+      }
+
+
+      if (type === "status") {
+        toggleSelection(selectedStatuses, val);
+        btn.classList.toggle("active", selectedStatuses.includes(val));
+      }
+
+      if (type === "type") {
+        toggleSelection(selectedTypes, val);
+        btn.classList.toggle("active", selectedTypes.includes(val));
+      }
+
+      if (type === "character") {
+        toggleSelection(selectedCharacters, val);
+        btn.classList.toggle("active", selectedCharacters.includes(val));
+      }
+
+      applyFilters();
+    };
 
     container.appendChild(btn);
-  };
+  });
+}
 
 function updateButtonState(button, isActive) {
   button.classList.toggle("active", isActive);
@@ -752,9 +772,11 @@ function updateCharacterFilterByWork() {
 }
 
 
-document.getElementById("modal").addEventListener("click", e => {
-  if (e.target.id === "modal") closeModal();
+document.getElementById("searchInput").addEventListener("input", e => {
+  searchKeyword = e.target.value.trim().toLowerCase();
+  applyFilters();
 });
+
 
 
 document.getElementById("searchInput").addEventListener("input", e => {
