@@ -318,6 +318,17 @@ header {
   #filtersWrapper.show {
     display: block;
   }
+
+  @media (max-width: 768px) {
+  #filtersWrapper {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 20;
+    padding: 16px;
+    overflow-y: auto;
+  }
+}
 }
 
 
@@ -744,6 +755,20 @@ modalBox.addEventListener("touchend", e => {
   const delta = startY - e.changedTouches[0].clientY;
   if (delta > 80) closeModal();
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleBtn = document.getElementById("toggleFiltersBtn");
+  const filtersWrapper = document.getElementById("filtersWrapper");
+
+  if (!toggleBtn || !filtersWrapper) return;
+
+  toggleBtn.addEventListener("click", () => {
+    filtersWrapper.classList.toggle("show");
+  });
+});
+
+
 </script>
 
 
