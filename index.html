@@ -460,6 +460,14 @@ const currencyMap = {
   "日幣": "JPY"
 };
 
+const currencySymbolMap = {
+  "新台幣": "NT$",
+  "台幣": "NT$",
+  "人民幣": "¥",
+  "日幣": "¥"
+};
+
+
 /* =========================
    共用工具
 ========================= */
@@ -680,6 +688,20 @@ function formatPrice(amount, currency) {
     console.error("formatPrice error:", amount, currency);
     return amount;
   }
+}
+
+
+function displayPrice(amount, currencyText) {
+  if (!amount) return "";
+
+  const symbol = currencySymbolMap[currencyText] || "";
+
+  // 沒填幣值 → 只顯示數字
+  if (!currencyText) {
+    return amount;
+  }
+
+  return `${currencyText} ${symbol}${amount}`;
 }
 
 
@@ -1338,19 +1360,19 @@ function renderGrid(list) {
       <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
       <div class="card-info">
       <div class="current-price">
-       ${formatPrice(
-        item.price,
-        currencyMap[item.priceCurrencyText]
-       )}
-      </div>
+  ${displayPrice(item.price, item.priceCurrencyText)}
+</div>
+
        ${item.originalPrice
   ? `<div class="original-price">
-      ${formatPrice(
+      ${displayPrice(
         item.originalPrice,
-        currencyMap[item.originalCurrencyText]
+        item.originalCurrencyText
       )}
-}     
-</div>
+    </div>`
+  : ""
+}
+
         <div class="card-title">${item.title}</div>
         <div class="badge ${item.status}">${item.status}</div>
         <div class="card-sub">${item.work} / ${item.character}</div>
@@ -1424,7 +1446,6 @@ modalBox.addEventListener("touchend", e => {
 
 </body>
 </html>
-
 
 
 
