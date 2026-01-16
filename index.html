@@ -441,6 +441,10 @@ header {
 </div>
 
 <script>
+/* =========================
+   狀態管理
+========================= */
+let allItems = [];
 let searchKeyword = "";
 
 let selectedWorks = [];
@@ -448,19 +452,28 @@ let selectedCharacters = [];
 let selectedStatuses = [];
 let selectedTypes = [];
 
+/* ===== 幣值中文 → ISO 代碼 對照 ===== */
+const currencyMap = {
+  "新台幣": "TWD",
+  "台幣": "TWD",
+  "人民幣": "CNY",
+  "日幣": "JPY"
+};
+
+/* =========================
+   共用工具
+========================= */
 function toggleSelection(array, value) {
-  const index = array.indexOf(value);
-  if (index === -1) {
-    array.push(value);      // 未選 → 加入
-  } else {
-    array.splice(index, 1); // 已選 → 移除
-  }
+  const idx = array.indexOf(value);
+  if (idx === -1) array.push(value);
+  else array.splice(idx, 1);
 }
 
-
-
+/* =========================
+   核心篩選
+========================= */
 function applyFilters() {
-  syncCharacterFiltersByWorks(); // 保證角色狀態一致
+  syncCharacterFiltersByWorks();
 
   let result = [...allItems];
 
@@ -487,163 +500,111 @@ function applyFilters() {
   renderGrid(result);
 }
 
+/* =========================
+   角色依作品動態顯示
+========================= */
 function syncCharacterFiltersByWorks() {
-  const characterContainer = document.getElementById("characterFilters");
-  const buttons = characterContainer.querySelectorAll("button");
+  const container = document.getElementById("characterFilters");
+  const buttons = container.querySelectorAll("button");
 
-  // 若未選任何作品 → 顯示全部角色
-  if (selectedWorks.length === 0) {
-    buttons.forEach(btn => {
-      btn.style.display = "";
-    });
+  if (!selectedWorks.length) {
+    buttons.forEach(b => b.style.display = "");
     return;
   }
 
-  // 目前作品對應的角色集合
   const validCharacters = new Set(
     allItems
-      .filter(item => selectedWorks.includes(item.work))
-      .map(item => item.character)
+      .filter(i => selectedWorks.includes(i.work))
+      .map(i => i.character)
       .filter(Boolean)
   );
 
   buttons.forEach(btn => {
-    const role = btn.textContent.trim();
+    const val = btn.textContent.trim();
+    const valid = validCharacters.has(val);
 
-    if (validCharacters.has(role)) {
-      btn.style.display = "";
-    } else {
-      btn.style.display = "none";
+    btn.style.display = valid ? "" : "none";
 
-      // 若此角色已被選中，則自動取消
-      const idx = selectedCharacters.indexOf(role);
-      if (idx !== -1) {
-        selectedCharacters.splice(idx, 1);
-        btn.classList.remove("active");
-      }
+    if (!valid) {
+      btn.classList.remove("active");
+      const idx = selectedCharacters.indexOf(val);
+      if (idx !== -1) selectedCharacters.splice(idx, 1);
     }
   });
 }
 
-
-function getAvailableCharacters() {
-  if (selectedWorks.length === 0) return allCharacters;
-
-  return allCharacters.filter(c =>
-    allItems.some(i =>
-      selectedWorks.includes(i.work) && i.character === c
-    )
-  );
-}
-
-
-
+/* =========================
+   資料載入
+========================= */
 const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
-let allItems = [];
 
-/* Google Drive 圖片轉換 */
 function convertDriveLink(link) {
   if (!link) return "";
-  const match = link.match(/[-\w]{25,}/);
-  if (!match) return link;
-  return `https://lh3.googleusercontent.com/d/${match[0]}`;
+  const m = link.match(/[-\w]{25,}/);
+  return m ? `https://lh3.googleusercontent.com/d/${m[0]}` : link;
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (isNaN(d)) return dateStr; // 如果不是有效日期，就原樣顯示
-
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-
-  // 星期陣列
-  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-  const weekday = weekdays[d.getDay()];
-
-  return `${year}/${month}/${day} (${weekday})`;
+function formatDate(str) {
+  if (!str) return "";
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
-
 
 fetch(url)
-  .then(res => res.json())
+  .then(r => r.json())
   .then(data => {
     allItems = data.map(item => ({
-      work: (item["作品"] || "").trim(),
-      character: (item["角色（扭蛋請填寫系列名稱）"] || "").trim(),
-      title: (item["明細（標題）"] || "").trim(),
-      type: (item["類型"] || "").trim(),
-      image: convertDriveLink(item["照片"]),
-      quantity: (item["數量"] || "").toString().trim(),
-      status: (item["狀態"] || "").trim(),
-      price: (item["金額"] || "").toString().trim(),
-      originalPrice: (item["原價"] || "").toString().trim(),
-      platform: (item["購買平台"] || "").trim(),
-      note: (item["備註（扭蛋請填角色名稱）"] || "").trim(),
-      date: formatDate(item["日期"])
+     work: (item["作品"] || "").trim(),
+     character: (item["角色（扭蛋請填寫系列名稱）"] || "").trim(),
+     title: (item["明細（標題）"] || "").trim(),
+     type: (item["類型"] || "").trim(),
+     image: convertDriveLink(item["照片"]),
+     quantity: (item["數量"] || "").toString().trim(),
+     status: (item["狀態"] || "").trim(),
+
+     price: (item["金額"] || "").toString().trim(),
+     priceCurrencyText: (item["幣值"] || "").trim(),           // ← 新增
+     originalPrice: (item["原價"] || "").toString().trim(),
+     originalCurrencyText: (item["原價幣值"] || "").trim(),    // ← 新增
+
+     platform: (item["購買平台"] || "").trim(),
+     note: (item["備註（扭蛋請填角色名稱）"] || "").trim(),
+     date: formatDate(item["日期"])
     }));
+
 
     createFilters();
     renderGrid(allItems);
-  })
+  });
 
-  .catch(err => console.error("資料讀取失敗：", err));
-
-function formatPrice(amount, currency) {
-  if (!amount || !currency) return "";
-  return new Intl.NumberFormat("zh-TW", {
-    style: "currency",
-    currency: currency,
-    maximumFractionDigits: 0
-  }).format(amount);
-}
-
-
-
+/* =========================
+   建立篩選按鈕
+========================= */
 function createFilters() {
-  const workSet = new Set(allItems.map(i => i.work).filter(Boolean));
-  const statusSet = new Set(allItems.map(i => i.status).filter(Boolean));
-  const typeSet = new Set(allItems.map(i => i.type).filter(Boolean));
-  const characterSet = new Set(allItems.map(i => i.character).filter(Boolean));
+  const map = {
+    work: [...new Set(allItems.map(i => i.work).filter(Boolean))],
+    status: [...new Set(allItems.map(i => i.status).filter(Boolean))],
+    type: [...new Set(allItems.map(i => i.type).filter(Boolean))],
+    character: [...new Set(allItems.map(i => i.character).filter(Boolean))]
+  };
 
-  addFilterButtons(document.getElementById("workFilters"), workSet, "work");
-  addFilterButtons(document.getElementById("statusFilters"), statusSet, "status");
-  addFilterButtons(document.getElementById("typeFilters"), typeSet, "type");
-  addFilterButtons(document.getElementById("characterFilters"), characterSet, "character");
+  addFilterButtons("workFilters", map.work, selectedWorks);
+  addFilterButtons("statusFilters", map.status, selectedStatuses);
+  addFilterButtons("typeFilters", map.type, selectedTypes);
+  addFilterButtons("characterFilters", map.character, selectedCharacters);
 }
 
+function addFilterButtons(containerId, values, targetArray) {
+  const container = document.getElementById(containerId);
 
-function addFilterButtons(container, values, type) {
   values.forEach(val => {
     const btn = document.createElement("button");
     btn.textContent = val;
-    btn.classList.add("filter-btn");
 
     btn.onclick = () => {
-      if (type === "work") {
-       toggleSelection(selectedWorks, val);
-       btn.classList.toggle("active", selectedWorks.includes(val));
-
-       syncCharacterFiltersByWorks(); // ⭐ 新增
-      }
-
-
-      if (type === "status") {
-        toggleSelection(selectedStatuses, val);
-        btn.classList.toggle("active", selectedStatuses.includes(val));
-      }
-
-      if (type === "type") {
-        toggleSelection(selectedTypes, val);
-        btn.classList.toggle("active", selectedTypes.includes(val));
-      }
-
-      if (type === "character") {
-        toggleSelection(selectedCharacters, val);
-        btn.classList.toggle("active", selectedCharacters.includes(val));
-      }
-
+      toggleSelection(targetArray, val);
+      btn.classList.toggle("active", targetArray.includes(val));
       applyFilters();
     };
 
@@ -651,33 +612,34 @@ function addFilterButtons(container, values, type) {
   });
 }
 
-function updateButtonState(button, isActive) {
-  button.classList.toggle("active", isActive);
-}
-
-
-function updateActive(container, activeBtn) {
-  container.querySelectorAll("button").forEach(btn =>
-    btn.classList.remove("active")
-  );
-  activeBtn.classList.add("active");
-}
-
+/* =========================
+   Grid & Modal
+========================= */
 function renderGrid(list) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
+
   list.forEach(item => {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <img src="${item.image}" loading="lazy"
-       onerror="this.src='https://picsum.photos/300'">
+      <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
       <div class="card-info">
+      <div class="current-price">
+       ${formatPrice(
+        item.price,
+        currencyMap[item.priceCurrencyText]
+       )}
+      </div>
+       ${item.originalPrice
+  ? `<div class="original-price">
+      ${formatPrice(
+        item.originalPrice,
+        currencyMap[item.originalCurrencyText]
+      )}
+}     
+</div>
         <div class="card-title">${item.title}</div>
-        <div class="price-row">
-          <div class="current-price">$${item.price}</div>
-          ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
-        </div>
         <div class="badge ${item.status}">${item.status}</div>
         <div class="card-sub">${item.work} / ${item.character}</div>
       </div>
@@ -695,151 +657,59 @@ function closeModal() {
 function openModal(item) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
+
   box.innerHTML = `
-  <div class="modal-header">
-    <button class="modal-close">← 返回</button>
-    <strong>詳細資料</strong>
-  </div>
-
-  <div class="modal-content">
-    <img src="${item.image}" onerror="this.src='https://picsum.photos/600'">
-
-    <h2>${item.title}</h2>
-
-    <div class="price-row">
-      <div class="current-price">$${item.price}</div>
-      ${item.originalPrice ? `<div class="original-price">$${item.originalPrice}</div>` : ""}
+    <div class="modal-header">
+      <button class="modal-close">← 返回</button>
+      <strong>詳細資料</strong>
     </div>
+    <div class="modal-content">
+      <img src="${item.image}">
+      <h2>${item.title}</h2>
+      <p>作品：${item.work}</p>
+      <p>角色：${item.character}</p>
+      <p>類型：${item.type}</p>
+      <p>備註：${item.note}</p>
+    </div>
+    <div class="current-price">
+     ${formatPrice(
+     item.price,
+     currencyMap[item.priceCurrencyText]
+     )}
+   
+ 
+    </div>
+  `;
 
-    <div class="badge">${item.status}</div>
-    <hr>
-
-    <p>作品：${item.work}</p>
-    <p>角色：${item.character}</p>
-    <p>類型：${item.type}</p>
-    <p>數量：${item.quantity}</p>
-    <p>平台：${item.platform}</p>
-    <p>備註：${item.note}</p>
-    <p>日期：${item.date}</p>
-  </div>
-`;
-
-
-box.querySelector(".modal-close").onclick = closeModal;
-
-  document.body.classList.remove("modal-open");
-  
-modal.style.display = "flex";
-document.body.classList.add("modal-open");
-
-};
-
-
-
-
-
-function updateCharacterFilterByWork() {
-  const characterDiv = document.getElementById("characterFilters");
-  const buttons = characterDiv.querySelectorAll("button");
-
-  // 若作品為「全部」，顯示全部角色
-  if (currentWork === "全部") {
-    buttons.forEach(btn => btn.style.display = "");
-    return;
-  }
-
-  // 該作品實際擁有的角色集合
- const validCharacters = new Set(
-  allItems
-    .filter(i => i.work === currentWork)
-    .map(i => (i.character || "").trim())
-    .filter(Boolean)
- );
-
-
-  buttons.forEach(btn => {
-    const val = btn.textContent.trim();
-
-
-    // 「全部」永遠顯示
-    if (val === "全部") {
-      btn.style.display = "";
-      return;
-    }
-
-    // 不在該作品內的角色 → 隱藏
-    btn.style.display = validCharacters.has(val) ? "" : "none";
-  });
-
-  // 若目前選的角色已不屬於此作品，自動重置
-  if (
-    currentCharacter !== "全部" &&
-    !validCharacters.has(currentCharacter)
-  ) {
-    currentCharacter = "全部";
-    const allBtn = characterDiv.querySelector("button");
-    updateActive(characterDiv, allBtn);
-  }
+  box.querySelector(".modal-close").onclick = closeModal;
+  modal.style.display = "flex";
+  document.body.classList.add("modal-open");
 }
 
-
+/* =========================
+   搜尋
+========================= */
 document.getElementById("searchInput").addEventListener("input", e => {
   searchKeyword = e.target.value.trim().toLowerCase();
   applyFilters();
 });
 
-
-
-document.getElementById("searchInput").addEventListener("input", e => {
-  searchKeyword = e.target.value.trim().toLowerCase();
-  applyFilters();
-});
-
-const toggleBtn = document.getElementById("toggleFiltersBtn");
-const filtersWrapper = document.getElementById("filtersWrapper");
-
-toggleBtn.addEventListener("click", () => {
-  filtersWrapper.classList.toggle("show");
-});
-
-/* 手機詳情頁 上滑即可退出 */
-
-let touchStartY = 0;
-let touchEndY = 0;
-
+/* =========================
+   手機滑動關閉
+========================= */
+let startY = 0;
 const modalBox = document.getElementById("modalBox");
 
 modalBox.addEventListener("touchstart", e => {
-  if (window.innerWidth > 768) return;
-  touchStartY = e.touches[0].clientY;
+  startY = e.touches[0].clientY;
 });
 
-modalBox.addEventListener("touchmove", e => {
-  if (window.innerWidth > 768) return;
-  touchEndY = e.touches[0].clientY;
+modalBox.addEventListener("touchend", e => {
+  const delta = startY - e.changedTouches[0].clientY;
+  if (delta > 80) closeModal();
 });
-
-modalBox.addEventListener("touchend", () => {
-  if (window.innerWidth > 768) return;
-
-  const delta = touchStartY - touchEndY;
-
-  /* 由下往上滑超過 80px，且已在底部 */
-  if (delta > 80 &&
-      modalBox.scrollTop + modalBox.clientHeight >= modalBox.scrollHeight - 5) {
-    closeModal();
-  }
-
-  touchStartY = 0;
-  touchEndY = 0;
-});
-
-document.getElementById("modalBox").addEventListener("click", e => {
-  e.stopPropagation();
-});
-
-
 </script>
+
 
 </body>
 </html>
