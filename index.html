@@ -799,7 +799,7 @@ modalBox.addEventListener("touchstart", e => {
 
 modalBox.addEventListener("touchend", e => {
   const delta = startY - e.changedTouches[0].clientY;
-  if (delta > 80) closeModal();
+  if (delta > 200) closeModal(); /*原先為80*/
 });
 
 
