@@ -406,6 +406,18 @@ header {
   }
 }
 
+/* 排序 */
+
+
+#sortSelect {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
 
 
 </style>
@@ -422,6 +434,14 @@ header {
     placeholder="搜尋標題、角色、備註…"
     autocomplete="off"
   >
+
+  <select id="sortSelect">
+    <option value="">排序：預設</option>
+    <option value="work">依作品</option>
+    <option value="character">依角色</option>
+    <option value="type">依類型</option>
+  </select>
+
 
   <button id="toggleFiltersBtn">篩選</button>
 
@@ -452,6 +472,9 @@ let selectedWorks = [];
 let selectedCharacters = [];
 let selectedStatuses = [];
 let selectedTypes = [];
+
+let sortKey = "";   // "work" | "character" | "type"
+
 
 /* ===== 幣值中文 → ISO 代碼 對照 ===== */
 const currencySymbolMap = {
@@ -499,6 +522,19 @@ function applyFilters() {
       (i.note || "").toLowerCase().includes(searchKeyword)
     );
   }
+
+  /* ===== 排序 ===== */
+  if (sortKey) {
+    result.sort((a, b) => {
+      const av = (a[sortKey] || "").localeCompare(
+        (b[sortKey] || ""),
+        "zh-Hant",
+        { numeric: true }
+      );
+      return av;
+    });
+  }
+
 
   renderGrid(result);
 }
@@ -735,6 +771,13 @@ function closeModal() {
   document.body.classList.remove("modal-open");
 }
 
+/* =========================
+   排序
+========================= */
+document.getElementById("sortSelect").addEventListener("change", e => {
+  sortKey = e.target.value;
+  applyFilters();
+});
 
 /* =========================
    搜尋
@@ -766,6 +809,5 @@ modalBox.addEventListener("touchend", e => {
 
 </body>
 </html>
-
 
 
