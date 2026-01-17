@@ -313,22 +313,16 @@ header {
 
   #filtersWrapper {
     display: none;
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 1000;
+    overflow-y: auto;
   }
 
   #filtersWrapper.show {
     display: block;
   }
-
-  @media (max-width: 768px) {
-  #filtersWrapper {
-    position: fixed;
-    inset: 0;
-    background: #fff;
-    z-index: 1000;
-    
-    overflow-y: auto;
-  }
-}
 }
 
 
@@ -437,12 +431,13 @@ header {
   <button id="toggleFiltersBtn">篩選</button>
 
   <div id="filtersWrapper">
-
   <div class="filters" id="workFilters"></div>
   <div class="filters" id="statusFilters"></div>
   <div class="filters" id="typeFilters"></div>
   <div class="filters" id="characterFilters"></div>
+</div>
 </header>
+
 
 
 <div class="grid" id="grid"></div>
@@ -770,24 +765,12 @@ modalBox.addEventListener("touchend", e => {
 });
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleBtn = document.getElementById("toggleFiltersBtn");
-  const filtersWrapper = document.getElementById("filtersWrapper");
-
-  if (!toggleBtn || !filtersWrapper) return;
-
-  toggleBtn.addEventListener("click", () => {
-    filtersWrapper.classList.toggle("show");
-  });
-});
-
 
 </script>
 
 
 </body>
 </html>
-
 
 
 
