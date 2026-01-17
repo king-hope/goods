@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的周邊收藏</title>
+
+
+<style>
+/* =====================
+   基本設定 / Theme
+===================== */
+:root {
+  --bg-main: #f2f2f2;
+  --bg-card: #ffffff;
+  --primary: #5c6bc0;
+  --text-main: #333;
+  --text-sub: #666;
+  --border-light: #ddd;
+  --shadow-soft: 0 2px 6px rgba(0,0,0,0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+
+/* =====================
+   Header & Filters
+===================== */
+header {
+  background: #fff;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filters {
+  margin-bottom: 8px;
+}
+
+.filters button {
+  margin: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #e0e0e0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+.filters button:hover {
+  background: #cfcfcf;
+}
+
+.filters button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+
+
+/* =====================
+   搜尋欄
+===================== */
+#searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  outline: none;
+}
+
+#searchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(92,107,192,.15);
+}
+
+
+/* =====================
+   Grid / Card
+===================== */
+.grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform .15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-title {
+  font-size: 14px;
+  text-align: center;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+
+/* =====================
+   Badge（狀態）
+===================== */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 6px 0;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* 狀態顏色 */
+.badge.已到家 {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.badge.已付款 {
+  background: #fff9c4;
+  color: #f9a825;
+}
+
+.badge.未付款 {
+  background: #bbdefb;
+  color: #1565c0;
+}
+
+
+/* =====================
+   價格顯示
+===================== */
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.current-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.original-price {
+  font-size: 13px;
+  color: #9e9e9e;
+}
+
+
+/* =====================
+   Modal
+===================== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* 關鍵 */
+}
+
+
+.modal-box {
+  background:#fff;
+  max-width:600px;
+  width:100%;
+  max-height:100%;
+  overflow-y:auto;
+  border-radius:0;
+  padding:16px;
+  transform: translateY(0);
+  transition: transform .25s ease;
+}
+
+.modal-box img {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.modal-box h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.modal-box p {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-box .price-row {
+  margin: 8px 0;
+}
+
+
+/* =====================
+   Mobile（APP 風格）
+===================== */
+@media (max-width: 768px) {
+
+  header {
+    padding: 12px 12px 8px;
+  }
+
+  header strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .filters {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filters button {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .filter-btn.active {
+  background: #222;
+  color: #fff;
+}
+
+  #searchInput {
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .card img {
+    height: 140px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-sub {
+    font-size: 11px;
+  }
+}
+
+#toggleFiltersBtn {
+  display: none;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #5c6bc0;
+  color: #fff;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  #toggleFiltersBtn {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  #filtersWrapper {
+    display: none;
+  }
+
+  #filtersWrapper.show {
+    display: block;
+  }
+}
+
+
+/*  手機端 返回按鍵  */
+.modal-close {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .modal-close {
+    display: block;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border: none;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #5c6bc0;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    z-index: 5;
+  }
+}
+
+
+/*手機端介面 滑出式*/
+
+@media (max-width: 768px) {
+  .modal {
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-height: 85%;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+
+/* ===== 手機：全螢幕 App-like Modal ===== */
+@media (max-width: 768px) {
+
+  .modal {
+    align-items: stretch;
+  }
+
+  .modal-box {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+   position: sticky;
+   top: 0;
+   z-index: 1001; /* 高於 header */
+   background: #fff;
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 12px 14px;
+   border-bottom: 1px solid #eee;
+  }
+
+
+  .modal-header button {
+    border: none;
+    background: none;
+    font-size: 16px;
+    color: #5c6bc0;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+
+  .modal-content {
+    padding: 14px;
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
+}
+
+
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+  <input
+    type="search"
+    id="searchInput"
+    placeholder="搜尋標題、角色、備註…"
+    autocomplete="off"
+  >
+
+  <button id="toggleFiltersBtn">篩選</button>
+
+  <div id="filtersWrapper">
+  <div class="filters" id="workFilters"></div>
+  <div class="filters" id="statusFilters"></div>
+  <div class="filters" id="typeFilters"></div>
+  <div class="filters" id="characterFilters"></div>
+</div>
+</header>
+
+
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script>
+/* =========================
+   狀態管理
+========================= */
+let allItems = [];
+let searchKeyword = "";
+
+let selectedWorks = [];
+let selectedCharacters = [];
+let selectedStatuses = [];
+let selectedTypes = [];
+
+/* ===== 幣值中文 → ISO 代碼 對照 ===== */
+const currencySymbolMap = {
+  "新台幣": "NT$",
+  "台幣": "NT$",
+  "人民幣": "¥",
+  "日幣": "¥",
+  "日圓": "¥"
+};
+
+
+/* =========================
+   共用工具
+========================= */
+function toggleSelection(array, value) {
+  const idx = array.indexOf(value);
+  if (idx === -1) array.push(value);
+  else array.splice(idx, 1);
+}
+
+/* =========================
+   核心篩選
+========================= */
+function applyFilters() {
+  syncCharacterFiltersByWorks();
+
+  let result = [...allItems]; // ← 一定要有
+
+  if (selectedWorks.length)
+    result = result.filter(i => selectedWorks.includes(i.work));
+
+  if (selectedCharacters.length)
+    result = result.filter(i => selectedCharacters.includes(i.character));
+
+  if (selectedStatuses.length)
+    result = result.filter(i => selectedStatuses.includes(i.status));
+
+  if (selectedTypes.length)
+    result = result.filter(i => selectedTypes.includes(i.type));
+
+  if (searchKeyword) {
+    result = result.filter(i =>
+      (i.title || "").toLowerCase().includes(searchKeyword) ||
+      (i.character || "").toLowerCase().includes(searchKeyword) ||
+      (i.note || "").toLowerCase().includes(searchKeyword)
+    );
+  }
+
+  renderGrid(result);
+}
+
+
+/* =========================
+   角色依作品動態顯示
+========================= */
+function syncCharacterFiltersByWorks() {
+  const container = document.getElementById("characterFilters");
+  const buttons = container.querySelectorAll("button");
+
+  if (!selectedWorks.length) {
+    buttons.forEach(b => b.style.display = "");
+    return;
+  }
+
+  const validCharacters = new Set(
+    allItems
+      .filter(i => selectedWorks.includes(i.work))
+      .map(i => i.character)
+      .filter(Boolean)
+  );
+
+  buttons.forEach(btn => {
+    const val = btn.textContent.trim();
+    const valid = validCharacters.has(val);
+
+    btn.style.display = valid ? "" : "none";
+
+    if (!valid) {
+      btn.classList.remove("active");
+      const idx = selectedCharacters.indexOf(val);
+      if (idx !== -1) selectedCharacters.splice(idx, 1);
+    }
+  });
+}
+
+/* =========================
+   資料載入
+========================= */
+const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeoxXjpQZG5t7GkM-mc7eV7pqcMSD-ASJApVYWqd9sBj/exec";
+
+function convertDriveLink(link) {
+  if (!link) return "";
+  const m = link.match(/[-\w]{25,}/);
+  return m ? `https://lh3.googleusercontent.com/d/${m[0]}` : link;
+}
+
+function formatDate(str) {
+  if (!str) return "";
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+
+fetch(url)
+  .then(r => r.json())
+  .then(data => {
+    allItems = data.map(item => ({
+     work: (item["作品"] || "").trim(),
+     character: (item["角色（扭蛋請填寫系列名稱）"] || "").trim(),
+     title: (item["明細（標題）"] || "").trim(),
+     type: (item["類型"] || "").trim(),
+     image: convertDriveLink(item["照片"]),
+     quantity: (item["數量"] || "").toString().trim(),
+     status: (item["狀態"] || "").trim(),
+
+     price: (item["金額"] || "").toString().trim(),
+     priceCurrencyText: (item["幣值"] || "").trim(),           // ← 新增
+     originalPrice: (item["原價"] || "").toString().trim(),
+     originalCurrencyText: (item["原價幣值"] || "").trim(),    // ← 新增
+
+     platform: (item["購買平台"] || "").trim(),
+     note: (item["備註（扭蛋請填角色名稱）"] || "").trim(),
+     date: formatDate(item["日期"])
+    }));
+
+
+    createFilters();
+    renderGrid(allItems);
+  });
+
+/* =========================
+   建立篩選按鈕
+========================= */
+function createFilters() {
+  const map = {
+    work: [...new Set(allItems.map(i => i.work).filter(Boolean))],
+    status: [...new Set(allItems.map(i => i.status).filter(Boolean))],
+    type: [...new Set(allItems.map(i => i.type).filter(Boolean))],
+    character: [...new Set(allItems.map(i => i.character).filter(Boolean))]
+  };
+
+  addFilterButtons("workFilters", map.work, selectedWorks);
+  addFilterButtons("statusFilters", map.status, selectedStatuses);
+  addFilterButtons("typeFilters", map.type, selectedTypes);
+  addFilterButtons("characterFilters", map.character, selectedCharacters);
+}
+
+function addFilterButtons(containerId, values, targetArray) {
+  const container = document.getElementById(containerId);
+
+  values.forEach(val => {
+    const btn = document.createElement("button");
+    btn.textContent = val;
+
+    btn.onclick = () => {
+      toggleSelection(targetArray, val);
+      btn.classList.toggle("active", targetArray.includes(val));
+      applyFilters();
+    };
+
+    container.appendChild(btn);
+  });
+}
+
+const toggleBtn = document.getElementById("toggleFiltersBtn");
+const filtersWrapper = document.getElementById("filtersWrapper");
+
+let filtersOpen = false; // ⭐ 關鍵狀態
+
+toggleBtn.addEventListener("click", () => {
+  filtersOpen = !filtersOpen; // true ↔ false
+  filtersWrapper.classList.toggle("show", filtersOpen);
+});
+
+/* =========================
+   Grid & Modal
+========================= */
+function renderGrid(list) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  list.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
+
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
+
+        <div class="price-row">
+          <div class="current-price">
+            ${formatPrice(item.price, item.priceCurrencyText)}
+          </div>
+
+          ${
+            item.originalPrice
+              ? `<div class="original-price">
+                   ${formatPrice(item.originalPrice, item.originalCurrencyText)}
+                 </div>`
+              : ""
+          }
+        </div>
+
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
+      </div>
+    `;
+
+    card.onclick = () => openModal(item);
+    grid.appendChild(card);
+  });
+}
+
+function formatPrice(amount, currencyText) {
+  if (!amount) return "";
+
+  const symbol = currencySymbolMap[currencyText] || "";
+
+  // 顯示格式：新台幣 NT$250 / 人民幣 ¥25
+  return currencyText
+    ? `${currencyText} ${symbol}${amount}`
+    : `${amount}`;
+}
+
+
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+function openModal(item) {
+  const modal = document.getElementById("modal");
+  const box = document.getElementById("modalBox");
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <button class="modal-close">← 返回</button>
+      <strong>詳細資料</strong>
+    </div>
+
+    <div class="modal-content">
+      <img src="${item.image}">
+      <h2>${item.title}</h2>
+
+      <div class="price-row">
+        <div class="current-price">
+          ${formatPrice(item.price, item.priceCurrencyText)}
+        </div>
+        ${
+          item.originalPrice
+            ? `<div class="original-price">
+                 ${formatPrice(item.originalPrice, item.originalCurrencyText)}
+               </div>`
+            : ""
+        }
+      </div>
+
+      <p>作品：${item.work}</p>
+    <p>角色：${item.character}</p>
+    <p>類型：${item.type}</p>
+    <p>數量：${item.quantity}</p>
+    <p>平台：${item.platform}</p>
+    <p>備註：${item.note}</p>
+    <p>日期：${item.date}</p>
+    </div>
+  `;
+
+  box.querySelector(".modal-close").onclick = closeModal;
+  modal.style.display = "flex";
+  document.body.classList.add("modal-open");
+}
+
+
+
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+
+/* =========================
+   搜尋
+========================= */
+document.getElementById("searchInput").addEventListener("input", e => {
+  searchKeyword = e.target.value.trim().toLowerCase();
+  applyFilters();
+});
+
+/* =========================
+   手機滑動關閉
+========================= */
+let startY = 0;
+const modalBox = document.getElementById("modalBox");
+
+modalBox.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+
+modalBox.addEventListener("touchend", e => {
+  const delta = startY - e.changedTouches[0].clientY;
+  if (delta > 80) closeModal();
+});
+
+
+
+</script>
+
+
+</body>
+</html>
+
+
