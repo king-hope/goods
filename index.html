@@ -324,8 +324,8 @@ header {
     position: fixed;
     inset: 0;
     background: #fff;
-    z-index: 20;
-    padding: 16px;
+    z-index: 1000;
+    
     overflow-y: auto;
   }
 }
@@ -626,6 +626,16 @@ function addFilterButtons(containerId, values, targetArray) {
   });
 }
 
+const toggleBtn = document.getElementById("toggleFiltersBtn");
+const filtersWrapper = document.getElementById("filtersWrapper");
+
+let filtersOpen = false; // ⭐ 關鍵狀態
+
+toggleBtn.addEventListener("click", () => {
+  filtersOpen = !filtersOpen; // true ↔ false
+  filtersWrapper.classList.toggle("show", filtersOpen);
+});
+
 /* =========================
    Grid & Modal
 ========================= */
@@ -777,6 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
