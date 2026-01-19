@@ -674,7 +674,12 @@ function renderGrid(list) {
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${item.image}" onerror="this.src='https://picsum.photos/300'">
+      <img 
+  data-src="${item.image}"
+  src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+  loading="lazy"
+  onerror="this.src='https://picsum.photos/300'"
+>
 
       <div class="card-info">
         <div class="card-title">${item.title}</div>
@@ -701,6 +706,9 @@ function renderGrid(list) {
     card.onclick = () => openModal(item);
     grid.appendChild(card);
   });
+observeImages();
+
+  
 }
 
 function formatPrice(amount, currencyText) {
@@ -802,6 +810,21 @@ modalBox.addEventListener("touchend", e => {
   if (delta > 200) closeModal(); /*原先為80*/
 });
 
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      img.src = img.dataset.src;
+      observer.unobserve(img);
+    }
+  });
+});
+
+function observeImages() {
+  document.querySelectorAll("img[data-src]").forEach(img => {
+    observer.observe(img);
+  });
+}
 
 
 </script>
