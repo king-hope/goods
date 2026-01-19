@@ -475,6 +475,8 @@ let selectedTypes = [];
 
 let sortKey = "";   // "work" | "character" | "type"
 
+const INITIAL_RENDER_COUNT = 40;
+
 
 /* ===== 幣值中文 → ISO 代碼 對照 ===== */
 const currencySymbolMap = {
@@ -614,8 +616,13 @@ fetch(url)
     }));
 
 
-    createFilters();
-    renderGrid(allItems);
+    renderGrid(allItems.slice(0, INITIAL_RENDER_COUNT));
+
+requestIdleCallback(() => {
+  createFilters();
+});
+
+
   });
 
 /* =========================
@@ -669,46 +676,21 @@ function renderGrid(list) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
 
-  list.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "card";
+  const fragment = document.createDocumentFragment();
 
-    card.innerHTML = `
-      <img 
-  data-src="${item.image}"
-  src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-  loading="lazy"
-  onerror="this.src='https://picsum.photos/300'"
->
+list.forEach(item => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `...`;
+  card.onclick = () => openModal(item);
+  fragment.appendChild(card);
+});
 
-      <div class="card-info">
-        <div class="card-title">${item.title}</div>
+grid.appendChild(fragment);
 
-        <div class="price-row">
-          <div class="current-price">
-            ${formatPrice(item.price, item.priceCurrencyText)}
-          </div>
-
-          ${
-            item.originalPrice
-              ? `<div class="original-price">
-                   ${formatPrice(item.originalPrice, item.originalCurrencyText)}
-                 </div>`
-              : ""
-          }
-        </div>
-
-        <div class="badge ${item.status}">${item.status}</div>
-        <div class="card-sub">${item.work} / ${item.character}</div>
-      </div>
-    `;
-
-    card.onclick = () => openModal(item);
-    grid.appendChild(card);
-  });
 observeImages();
 
-  
+
 }
 
 function formatPrice(amount, currencyText) {
