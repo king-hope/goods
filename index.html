@@ -514,27 +514,20 @@ function toggleSelection(array, value) {
 function applyFilters() {
   syncCharacterFiltersByWorks();
 
-  let result = [...allItems]; // ← 一定要有
-
-  if (selectedWorks.length)
-    result = result.filter(i => selectedWorks.includes(i.work));
-
-  if (selectedCharacters.length)
-    result = result.filter(i => selectedCharacters.includes(i.character));
-
-  if (selectedStatuses.length)
-    result = result.filter(i => selectedStatuses.includes(i.status));
-
-  if (selectedTypes.length)
-    result = result.filter(i => selectedTypes.includes(i.type));
+  let result = allItems.filter(i => {
+  if (selectedWorks.length && !selectedWorks.includes(i.work)) return false;
+  if (selectedCharacters.length && !selectedCharacters.includes(i.character)) return false;
+  if (selectedStatuses.length && !selectedStatuses.includes(i.status)) return false;
+  if (selectedTypes.length && !selectedTypes.includes(i.type)) return false;
 
   if (searchKeyword) {
-    result = result.filter(i =>
-      (i.title || "").toLowerCase().includes(searchKeyword) ||
-      (i.character || "").toLowerCase().includes(searchKeyword) ||
-      (i.note || "").toLowerCase().includes(searchKeyword)
-    );
+    const text = `${i.title} ${i.character} ${i.note}`.toLowerCase();
+    if (!text.includes(searchKeyword)) return false;
   }
+
+  return true;
+});
+
 
 const specialRules = [
   {
@@ -646,9 +639,11 @@ fetch(url)
 
     renderGrid(allItems.slice(0, INITIAL_RENDER_COUNT));
 
-requestIdleCallback(() => {
-  createFilters();
-});
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(createFilters);
+} else {
+  setTimeout(createFilters, 0);
+}
 
 
   });
@@ -769,11 +764,6 @@ function formatPrice(amount, currencyText) {
 
 
 
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
-  document.body.classList.remove("modal-open");
-}
-
 function openModal(item) {
   const modal = document.getElementById("modal");
   const box = document.getElementById("modalBox");
@@ -870,6 +860,10 @@ function observeImages() {
     observer.observe(img);
   });
 }
+
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target.id === "modal") closeModal();
+});
 
 
 </script>
