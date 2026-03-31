@@ -866,9 +866,27 @@ const observer = new IntersectionObserver(entries => {
 });
 
 function observeImages() {
-  document.querySelectorAll("img[data-src]").forEach(img => {
-    observer.observe(img);
+  const images = document.querySelectorAll("img[data-src]");
+
+  if (!("IntersectionObserver" in window)) {
+    // fallback：全部直接載入
+    images.forEach(img => {
+      img.src = img.dataset.src;
+    });
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        observer.unobserve(img);
+      }
+    });
   });
+
+  images.forEach(img => observer.observe(img));
 }
 
 document.getElementById("modal").addEventListener("click", e => {
