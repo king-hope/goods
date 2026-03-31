@@ -611,7 +611,7 @@ function convertDriveLink(link) {
   const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
 
   if (match && match[1]) {
-    return `https://lh3.googleusercontent.com/d/${match[1]}=s800`;
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
   }
 
   return link;
@@ -721,11 +721,11 @@ list.forEach(item => {
     card.classList.add("image-only-mode");
 
     card.innerHTML = `
-      <img src="${item.image}" class="image-only">
+      <img data-src="${item.image}">
     `;
   } else {
     card.innerHTML = `
-      <img src="${item.image}">
+      <img data-src="${item.image}">
 
       <div class="card-info">
         <div class="card-title">${item.title}</div>
@@ -784,7 +784,7 @@ function openModal(item) {
     </div>
 
     <div class="modal-content">
-      <img src="${item.image}">
+      <img data-src="${item.image}">
       <h2>${item.title}</h2>
 
       <div class="price-row">
