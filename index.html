@@ -488,6 +488,25 @@ let sortKey = "";   // "work" | "character" | "type"
 
 const INITIAL_RENDER_COUNT = 40;
 
+/* =========================
+   特殊顯示規則（全域）
+========================= */
+const specialRules = [
+  {
+    work: "偶像夢幻祭",
+    character: "神崎颯馬",
+    type: "紙片"
+  }
+];
+
+function isSpecialItem(item) {
+  return specialRules.some(rule =>
+    (!rule.work || item.work === rule.work) &&
+    (!rule.character || item.character === rule.character) &&
+    (!rule.type || item.type === rule.type)
+  );
+}
+
 
 /* ===== 幣值中文 → ISO 代碼 對照 ===== */
 const currencySymbolMap = {
@@ -529,21 +548,6 @@ function applyFilters() {
 });
 
 
-const specialRules = [
-  {
-    work: "偶像夢幻祭",
-    character: "神崎颯馬",
-    type: "紙片"
-  }
-];
-
-function isSpecialItem(item) {
-  return specialRules.some(rule =>
-    (!rule.work || item.work === rule.work) &&
-    (!rule.character || item.character === rule.character) &&
-    (!rule.type || item.type === rule.type)
-  );
-}
 
 
   /* ===== 排序 ===== */
@@ -604,7 +608,9 @@ const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeox
 function convertDriveLink(link) {
   if (!link) return "";
   const m = link.match(/[-\w]{25,}/);
-  return m ? `https://lh3.googleusercontent.com/d/${m[0]}` : link;
+  return m
+    ? `https://drive.google.com/uc?export=view&id=${m[0]}`
+    : link;
 }
 
 function formatDate(str) {
