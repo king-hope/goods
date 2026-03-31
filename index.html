@@ -420,6 +420,17 @@ header {
 }
 
 
+.image-only-mode {
+  padding: 0;
+}
+
+.image-only {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+
 </style>
 
 </head>
@@ -524,6 +535,23 @@ function applyFilters() {
       (i.note || "").toLowerCase().includes(searchKeyword)
     );
   }
+
+const specialRules = [
+  {
+    work: "偶像夢幻祭",
+    character: "神崎颯馬",
+    type: "紙片"
+  }
+];
+
+function isSpecialItem(item) {
+  return specialRules.some(rule =>
+    (!rule.work || item.work === rule.work) &&
+    (!rule.character || item.character === rule.character) &&
+    (!rule.type || item.type === rule.type)
+  );
+}
+
 
   /* ===== 排序 ===== */
   if (sortKey) {
@@ -679,36 +707,43 @@ function renderGrid(list) {
   const fragment = document.createDocumentFragment();
 
 list.forEach(item => {
+  const isSpecial = isSpecialItem(item);
+
   const card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = `
-  <img
-    data-src="${item.image}"
-    alt=""
-    loading="lazy"
-    onerror="this.src='https://picsum.photos/300'"
-  >
 
-  <div class="card-info">
-    <div class="card-title">${item.title}</div>
+  if (isSpecial) {
+    card.classList.add("image-only-mode");
 
-    <div class="price-row">
-      <div class="current-price">
-        ${formatPrice(item.price, item.priceCurrencyText)}
+    card.innerHTML = `
+      <img data-src="${item.image}" class="image-only">
+    `;
+  } else {
+    card.innerHTML = `
+      <img data-src="${item.image}">
+
+      <div class="card-info">
+        <div class="card-title">${item.title}</div>
+
+        <div class="price-row">
+          <div class="current-price">
+            ${formatPrice(item.price, item.priceCurrencyText)}
+          </div>
+
+          ${
+            item.originalPrice
+              ? `<div class="original-price">
+                   ${formatPrice(item.originalPrice, item.originalCurrencyText)}
+                 </div>`
+              : ""
+          }
+        </div>
+
+        <div class="badge ${item.status}">${item.status}</div>
+        <div class="card-sub">${item.work} / ${item.character}</div>
       </div>
-      ${
-        item.originalPrice
-          ? `<div class="original-price">
-               ${formatPrice(item.originalPrice, item.originalCurrencyText)}
-             </div>`
-          : ""
-      }
-    </div>
-
-    <div class="badge ${item.status}">${item.status}</div>
-    <div class="card-sub">${item.work} / ${item.character}</div>
-  </div>
-`;
+    `;
+  }
 
   card.onclick = () => openModal(item);
   fragment.appendChild(card);
