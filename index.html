@@ -607,10 +607,14 @@ const url = "https://script.google.com/macros/s/AKfycbxAFKzizngqi_ppnOD3W5aASeox
 
 function convertDriveLink(link) {
   if (!link) return "";
-  const m = link.match(/[-\w]{25,}/);
-  return m
-    ? `https://drive.google.com/uc?export=view&id=${m[0]}`
-    : link;
+
+  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}=s800`;
+  }
+
+  return link;
 }
 
 function formatDate(str) {
